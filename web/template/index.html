@@ -1,0 +1,5 @@
+hello
+
+{{ range $i, $v := .Users }}
+    id: {{ $v.ID }}, name: {{ $v.Name }}
+{{ end }}
