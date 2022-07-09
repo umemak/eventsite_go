@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -13,6 +14,9 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Get("/", web.GetRoot)
+	r.Post("/", web.PostRoot)
 
-	http.ListenAndServe(":8081", r)
+	port := ":8081"
+	log.Printf("http://localhost%s", port)
+	http.ListenAndServe(port, r)
 }

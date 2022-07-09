@@ -1,7 +1,7 @@
 -- Adminer 4.8.1 MySQL 8.0.29 dump
 
 SET NAMES utf8;
-SET time_zone = '+00:00';
+SET time_zone = '+09:00';
 SET foreign_key_checks = 0;
 SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
 
@@ -65,6 +65,3 @@ CREATE TABLE `user` (
   `name` text COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
--- 2022-07-09 05:16:08

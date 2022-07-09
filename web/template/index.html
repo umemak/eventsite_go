@@ -1,5 +1,28 @@
-hello
+<html>
 
-{{ range $i, $v := .Users }}
-    id: {{ $v.ID }}, name: {{ $v.Name }}
-{{ end }}
+<body>
+    <table>
+        <thead>
+            <tr>
+                <th>id</th>
+                <th>name</th>
+                <th>delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{ range $i, $v := .Users }}
+            <tr>
+                <td>{{ $v.ID }}</td>
+                <td>{{ $v.Name }}</td>
+                <td></td>
+            </tr>
+            {{ end }}
+        </tbody>
+    </table>
+    <form action="/" method="POST">
+        name: <input type="text" name="name" value="" />
+        <input type="submit" value="登録" />
+    </form>
+</body>
+
+</html>

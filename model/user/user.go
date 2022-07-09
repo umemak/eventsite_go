@@ -27,7 +27,7 @@ func Create(u User) (int64, error) {
 	return res.LastInsertId()
 }
 
-func Find() ([]User, error) {
+func List() ([]User, error) {
 	db, err := db.Open()
 	if err != nil {
 		return nil, err
