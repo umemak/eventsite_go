@@ -39,12 +39,12 @@ func List() ([]User, error) {
 	}
 	users := []User{}
 	for rows.Next() {
-		var user User
-		err := rows.Scan(&user.ID, &user.Name)
+		var u User
+		err := rows.Scan(&u.ID, &u.Name)
 		if err != nil {
 			return nil, err
 		}
-		users = append(users, user)
+		users = append(users, u)
 	}
 	return users, nil
 }

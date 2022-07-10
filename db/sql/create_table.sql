@@ -40,6 +40,7 @@ CREATE TABLE `eventUser` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `eventid` bigint NOT NULL,
   `userid` bigint NOT NULL,
+  `status` int NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `eventid` (`eventid`),
   KEY `userid` (`userid`),

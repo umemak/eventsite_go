@@ -1,28 +1,15 @@
 <html>
 
 <body>
-    <table>
-        <thead>
-            <tr>
-                <th>id</th>
-                <th>name</th>
-                <th>delete</th>
-            </tr>
-        </thead>
-        <tbody>
-            {{ range $i, $v := .Users }}
-            <tr>
-                <td>{{ $v.ID }}</td>
-                <td>{{ $v.Name }}</td>
-                <td></td>
-            </tr>
-            {{ end }}
-        </tbody>
-    </table>
-    <form action="/" method="POST">
-        name: <input type="text" name="name" value="" />
-        <input type="submit" value="登録" />
-    </form>
+    <div class="top">
+        <h1>トップ</h1>
+        <button onclick='location.href="/login"'>ログイン</button><br />
+        <button onclick='location.href="/search"'>検索</button><br />
+        <br />
+        {{ range $i, $v := .Events }}
+        <button onclick='location.href="/event_detail?id={{ $v.ID }}"'>{{ $v.Title }}@{{ $v.Place }}</button><br />
+        {{ end }}
+    </div>
 </body>
 
 </html>
