@@ -1,0 +1,9 @@
+FROM alpine
+
+WORKDIR /app
+
+RUN wget https://github.com/pocketbase/pocketbase/releases/download/v0.2.4/pocketbase_0.2.4_linux_amd64.zip
+RUN unzip pocketbase_0.2.4_linux_amd64.zip
+RUN rm pocketbase_0.2.4_linux_amd64.zip
+
+CMD [ "/app/pocketbase", "serve", "--http", "0.0.0.0:8090" ]

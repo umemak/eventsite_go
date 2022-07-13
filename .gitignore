@@ -16,3 +16,6 @@
 
 # Air
 tmp/
+
+# pocketbase
+pb_data/

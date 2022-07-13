@@ -26,3 +26,13 @@ services:
       - 8081:8081
     volumes:
       - .:/app
+
+  pocketbase:
+    image: pocketbase:local
+    build:
+      context: .
+      dockerfile: Dockerfile.pocketbase
+    volumes:
+      - ./pb_data:/app/pb_data
+    ports:
+      - 8090:8090
