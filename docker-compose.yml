@@ -32,6 +32,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.pocketbase
+    container_name: pocketbase
+    environment:
+      TZ: 'Asia/Tokyo'
     volumes:
       - ./pb_data:/app/pb_data
     ports:
