@@ -22,6 +22,9 @@ func main() {
 	r.Get("/", web.GetRoot)
 	r.Post("/", web.PostRoot)
 	r.Get("/login", web.GetLogin)
+	r.Post("/login", web.PostLogin)
+	r.Get("/signup", web.GetSignup)
+	r.Post("/signup", web.PostSignup)
 	r.Get("/event_create", web.GetEventCreate)
 	r.Get("/event_detail", web.GetEventDetail)
 

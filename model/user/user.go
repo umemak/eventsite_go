@@ -6,6 +6,7 @@ import (
 
 type User struct {
 	ID   int64
+	UID  string
 	Name string
 }
 
@@ -15,12 +16,12 @@ func Create(u User) (int64, error) {
 		return 0, err
 	}
 	defer db.Close()
-	stmt, err := db.Prepare("INSERT INTO user (name) VALUES (?)")
+	stmt, err := db.Prepare("INSERT INTO user (uid, name) VALUES (?, ?)")
 	if err != nil {
 		return 0, err
 	}
 	defer stmt.Close()
-	res, err := stmt.Exec(u.Name)
+	res, err := stmt.Exec(u.UID, u.Name)
 	if err != nil {
 		return 0, err
 	}
@@ -33,14 +34,14 @@ func List() ([]User, error) {
 		return nil, err
 	}
 	defer db.Close()
-	rows, err := db.Query("SELECT id, name FROM user ORDER BY id")
+	rows, err := db.Query("SELECT id, uid, name FROM user ORDER BY id")
 	if err != nil {
 		return nil, err
 	}
 	users := []User{}
 	for rows.Next() {
 		var u User
-		err := rows.Scan(&u.ID, &u.Name)
+		err := rows.Scan(&u.ID, &u.UID, &u.Name)
 		if err != nil {
 			return nil, err
 		}

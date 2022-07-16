@@ -3,7 +3,17 @@
 <body>
     <div class="login">
         <h1>ログイン</h1>
-        <amplify-authenticator></amplify-authenticator>
+        <form action="./login" method="POST">
+            メールアドレス: <input type="text" name="email" /><br>
+            パスワード: <input type="password" name="password" /><br>
+            <input type="submit" value="ログイン" />
+        </form>
+        <br>
+        {{if .User.UID}}
+        UID: {{.User.UID}}
+        {{else}}
+        <a href="./signup">ユーザー登録</a>
+        {{end}}
     </div>
 </body>
 
