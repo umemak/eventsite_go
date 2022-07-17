@@ -49,3 +49,18 @@ func List() ([]User, error) {
 	}
 	return users, nil
 }
+
+func GetByUID(uid string) (*User, error) {
+	db, err := db.Open()
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+	row := db.QueryRow("SELECT id, uid, name FROM user WHERE uid = ?", uid)
+	var u User
+	err = row.Scan(&u.ID, &u.UID, &u.Name)
+	if err != nil {
+		return nil, err
+	}
+	return &u, nil
+}
