@@ -6,7 +6,7 @@
         <h3>作成済みイベント</h3>
         <div v-for="item in myEvents" :key="item.id">
             <router-link custom v-slot="{ navigate }" :to="{ name: 'Event', params: { eventId: item.id } }">
-                <button @click="navigate">{{ item.name }}@{{ item.place }}</button>
+                <button @click="navigate"></button>
             </router-link>
             <router-link custom v-slot="{ navigate }" :to="{ name: 'EventEdit', params: { eventId: item.id } }">
                 <button @click="navigate">編集</button>

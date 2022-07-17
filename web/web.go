@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"text/template"
@@ -18,12 +20,19 @@ import (
 	"github.com/umemak/eventsite_go/model/user"
 )
 
-func GetRoot(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("web/template/index.html")
-	if err != nil {
-		log.Fatalf("template.ParseFiles: %v", err)
-	}
+var tpls = map[string]*template.Template{}
 
+func init() {
+	files, err := filepath.Glob(path.Join("web", "template", "*.html"))
+	if err != nil {
+		log.Fatalf("filepath.Glob: %v", err)
+	}
+	for _, file := range files {
+		tpls[filepath.Base(file)] = template.Must(template.ParseFiles(file))
+	}
+}
+
+func GetRoot(w http.ResponseWriter, r *http.Request) {
 	isLogin := true
 	token, _, err := jwtauth.FromContext(r.Context())
 	if err != nil {
@@ -42,7 +51,7 @@ func GetRoot(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalf("event.List: %v", err)
 	}
-	t.Execute(w, struct {
+	err = tpls["index.html"].Execute(w, struct {
 		Events  []event.Event
 		IsLogin bool
 		Name    string
@@ -51,14 +60,13 @@ func GetRoot(w http.ResponseWriter, r *http.Request) {
 		IsLogin: isLogin,
 		Name:    name,
 	})
+	if err != nil {
+		log.Fatalf("Execute: %v", err)
+	}
 }
 
 func PostRoot(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("web/template/index.html")
-	if err != nil {
-		log.Fatalf("template.ParseFiles: %v", err)
-	}
-	err = r.ParseForm()
+	err := r.ParseForm()
 	if err != nil {
 		log.Fatalf("ParseForm: %v", err)
 	}
@@ -70,31 +78,27 @@ func PostRoot(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalf("user.List: %v", err)
 	}
-	t.Execute(w, struct {
+	err = tpls["index.html"].Execute(w, struct {
 		Users []user.User
 	}{
 		Users: users,
 	})
+	if err != nil {
+		log.Fatalf("Execute: %v", err)
+	}
 }
 
 func GetLogin(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("web/template/login.html")
+	err := tpls["login.html"].Execute(w, nil)
 	if err != nil {
-		log.Fatalf("template.ParseFiles: %v", err)
+		log.Fatalf("Execute: %v", err)
 	}
-	t.Execute(w, nil)
 }
 
 func PostLogin(w http.ResponseWriter, r *http.Request) {
-	t_ok, err := template.ParseFiles("web/template/index.html")
-	if err != nil {
-		log.Fatalf("template.ParseFiles: %v", err)
-	}
-	t_ng, err := template.ParseFiles("web/template/login.html")
-	if err != nil {
-		log.Fatalf("template.ParseFiles: %v", err)
-	}
-	err = r.ParseForm()
+	html_ok := "index.html"
+	html_ng := "login.html"
+	err := r.ParseForm()
 	if err != nil {
 		log.Fatalf("ParseForm: %v", err)
 	}
@@ -105,7 +109,10 @@ func PostLogin(w http.ResponseWriter, r *http.Request) {
 	req, err := http.NewRequest("POST", url, strings.NewReader(jsonString))
 	if err != nil {
 		log.Printf("NewRequest: %v", err)
-		t_ng.Execute(w, nil)
+		err = tpls[html_ng].Execute(w, nil)
+		if err != nil {
+			log.Fatalf("Execute: %v", err)
+		}
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -113,14 +120,20 @@ func PostLogin(w http.ResponseWriter, r *http.Request) {
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("Do: %v", err)
-		t_ng.Execute(w, nil)
+		err = tpls[html_ng].Execute(w, nil)
+		if err != nil {
+			log.Fatalf("Execute: %v", err)
+		}
 		return
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Printf("ReadAll: %v", err)
-		t_ng.Execute(w, nil)
+		err = tpls[html_ng].Execute(w, nil)
+		if err != nil {
+			log.Fatalf("Execute: %v", err)
+		}
 		return
 	}
 	var obj any
@@ -130,27 +143,39 @@ func PostLogin(w http.ResponseWriter, r *http.Request) {
 		message, err := dproxy.New(obj).M("message").String()
 		if err != nil {
 			log.Printf("dproxy.New(obj).M(\"message\").String(): %v", err)
-			t_ng.Execute(w, nil)
+			err = tpls[html_ng].Execute(w, nil)
+			if err != nil {
+				log.Fatalf("Execute: %v", err)
+			}
 			return
 		}
-		t_ng.Execute(w, struct {
+		err = tpls[html_ng].Execute(w, struct {
 			Message string
 		}{
 			Message: message,
 		})
+		if err != nil {
+			log.Fatalf("Execute: %v", err)
+		}
 		return
 	}
 
 	id, err := dproxy.New(obj).M("user").M("id").String()
 	if err != nil {
 		log.Printf("dproxy.New(obj).M(\"user\").M(\"id\").String(): %v", err)
-		t_ng.Execute(w, nil)
+		err = tpls[html_ng].Execute(w, nil)
+		if err != nil {
+			log.Fatalf("Execute: %v", err)
+		}
 		return
 	}
 	user, err := user.GetByUID(id)
 	if err != nil {
 		log.Printf("user.GetByUID: %v", err)
-		t_ng.Execute(w, nil)
+		err = tpls[html_ng].Execute(w, nil)
+		if err != nil {
+			log.Fatalf("Execute: %v", err)
+		}
 		return
 	}
 	tokenAuth := jwtauth.New("HS256", []byte("secret"), nil)
@@ -164,10 +189,13 @@ func PostLogin(w http.ResponseWriter, r *http.Request) {
 	events, err := event.List()
 	if err != nil {
 		log.Printf("event.List: %v", err)
-		t_ng.Execute(w, nil)
+		err = tpls[html_ng].Execute(w, nil)
+		if err != nil {
+			log.Fatalf("Execute: %v", err)
+		}
 		return
 	}
-	t_ok.Execute(w, struct {
+	err = tpls[html_ok].Execute(w, struct {
 		Events  []event.Event
 		IsLogin bool
 		Name    string
@@ -176,6 +204,9 @@ func PostLogin(w http.ResponseWriter, r *http.Request) {
 		IsLogin: true,
 		Name:    user.Name,
 	})
+	if err != nil {
+		log.Fatalf("Execute: %v", err)
+	}
 }
 
 func GetSignup(w http.ResponseWriter, r *http.Request) {
