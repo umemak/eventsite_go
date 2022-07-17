@@ -11,12 +11,6 @@ import (
 	"github.com/umemak/eventsite_go/web"
 )
 
-var tokenAuth *jwtauth.JWTAuth
-
-func init() {
-	tokenAuth = jwtauth.New("HS256", []byte("secret"), nil)
-}
-
 func main() {
 	r := chi.NewRouter()
 
@@ -25,10 +19,9 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(60 * time.Second))
-	r.Use(jwtauth.Verifier(tokenAuth))
+	r.Use(jwtauth.Verifier(web.TokenAuth))
 
-	r.Get("/", web.GetRoot)
-	r.Post("/", web.PostRoot)
+	r.Get("/", web.GetIndex)
 	r.Get("/login", web.GetLogin)
 	r.Post("/login", web.PostLogin)
 	r.Get("/signup", web.GetSignup)
