@@ -8,11 +8,15 @@ import (
 )
 
 func GetLogin(w http.ResponseWriter, r *http.Request) {
-	err := tpls["login.html"].Execute(w, struct {
+	u, err := user.BuildFromContext(r.Context())
+	if err != nil {
+		log.Printf("user.BuildFromContext: %v", err)
+	}
+	err = tpls["login.html"].Execute(w, struct {
 		Header  header
 		Message string
 	}{
-		Header:  header{Title: "ログイン"},
+		Header:  header{Title: "ログイン", User: u},
 		Message: "",
 	})
 	if err != nil {
@@ -22,7 +26,11 @@ func GetLogin(w http.ResponseWriter, r *http.Request) {
 
 func PostLogin(w http.ResponseWriter, r *http.Request) {
 	html_ng := "login.html"
-	err := r.ParseForm()
+	uh, err := user.BuildFromContext(r.Context())
+	if err != nil {
+		log.Printf("user.BuildFromContext: %v", err)
+	}
+	err = r.ParseForm()
 	if err != nil {
 		log.Fatalf("ParseForm: %v", err)
 	}
@@ -33,7 +41,7 @@ func PostLogin(w http.ResponseWriter, r *http.Request) {
 			Header  header
 			Message string
 		}{
-			Header:  header{Title: "ログイン"},
+			Header:  header{Title: "ログイン", User: uh},
 			Message: err.Error(),
 		})
 		if err != nil {

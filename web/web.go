@@ -21,6 +21,7 @@ var tpls = map[string]*template.Template{}
 
 type header struct {
 	Title string
+	User  user.User
 }
 
 func init() {

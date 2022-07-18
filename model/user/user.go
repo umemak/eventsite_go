@@ -1,9 +1,11 @@
 package user
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
+	"github.com/go-chi/jwtauth/v5"
 	"github.com/koron/go-dproxy"
 	"github.com/umemak/eventsite_go/db"
 	"github.com/umemak/eventsite_go/pb"
@@ -18,18 +20,18 @@ type User struct {
 func Create(email string, password string, passwordConfirm string, name string) (*User, error) {
 	body, err := pb.CreateUser(email, password, passwordConfirm)
 	if err != nil {
-		return nil, fmt.Errorf("CreateUser: %+w", err)
+		return nil, fmt.Errorf("CreateUser: %w", err)
 	}
 	var v any
 	json.Unmarshal(body, &v)
 	uid, err := dproxy.New(v).M("id").String()
 	if err != nil {
-		return nil, fmt.Errorf("dproxy: %+w", err)
+		return nil, fmt.Errorf("dproxy: %w", err)
 	}
 	ret := User{UID: uid, Name: name}
 	id, err := createDB(ret)
 	if err != nil {
-		return &ret, fmt.Errorf("createDB: %+w", err)
+		return &ret, fmt.Errorf("createDB: %w", err)
 	}
 	ret.ID = id
 	return &ret, nil
@@ -93,13 +95,25 @@ func GetByUID(uid string) (*User, error) {
 func AuthViaEmail(email string, password string) (*User, error) {
 	body, err := pb.AuthViaEmail(email, password)
 	if err != nil {
-		return nil, fmt.Errorf("AuthViaEmail: %+w", err)
+		return nil, fmt.Errorf("AuthViaEmail: %w", err)
 	}
 	var v any
 	json.Unmarshal(body, &v)
 	uid, err := dproxy.New(v).M("user").M("id").String()
 	if err != nil {
-		return nil, fmt.Errorf("dproxy: %+w", err)
+		return nil, fmt.Errorf("dproxy: %w", err)
 	}
 	return GetByUID(uid)
+}
+
+func BuildFromContext(ctx context.Context) (User, error) {
+	_, claims, err := jwtauth.FromContext(ctx)
+	if err != nil {
+		return User{}, fmt.Errorf("FromContext: %w", err)
+	}
+	return User{
+		ID:   int64(claims["id"].(float64)),
+		UID:  claims["uid"].(string),
+		Name: claims["name"].(string),
+	}, err
 }

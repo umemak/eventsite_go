@@ -16,18 +16,18 @@ func CreateUser(email string, password string, passwordConfirm string) ([]byte, 
 	fmt.Printf("%+v\n", jsonString)
 	req, err := http.NewRequest("POST", url, strings.NewReader(jsonString))
 	if err != nil {
-		return nil, fmt.Errorf("NewRequest: %+w", err)
+		return nil, fmt.Errorf("NewRequest: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 	client := new(http.Client)
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("Do: %+w", err)
+		return nil, fmt.Errorf("Do: %w", err)
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("ReadAll: %+w", err)
+		return nil, fmt.Errorf("ReadAll: %w", err)
 	}
 	st := resp.StatusCode
 	if st != http.StatusOK {
@@ -41,18 +41,18 @@ func AuthViaEmail(email string, password string) ([]byte, error) {
 	jsonString := fmt.Sprintf(`{"email": "%s", "password": "%s"}`, email, password)
 	req, err := http.NewRequest("POST", url, strings.NewReader(jsonString))
 	if err != nil {
-		return nil, fmt.Errorf("NewRequest: %+w", err)
+		return nil, fmt.Errorf("NewRequest: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 	client := new(http.Client)
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("Do: %+w", err)
+		return nil, fmt.Errorf("Do: %w", err)
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("ReadAll: %+w", err)
+		return nil, fmt.Errorf("ReadAll: %w", err)
 	}
 	st := resp.StatusCode
 	if st != http.StatusOK {

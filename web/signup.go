@@ -8,11 +8,15 @@ import (
 )
 
 func GetSignup(w http.ResponseWriter, r *http.Request) {
-	err := tpls["signup.html"].Execute(w, struct {
+	u, err := user.BuildFromContext(r.Context())
+	if err != nil {
+		log.Printf("user.BuildFromContext: %v", err)
+	}
+	err = tpls["signup.html"].Execute(w, struct {
 		Header  header
 		Message string
 	}{
-		Header:  header{Title: "ユーザー登録"},
+		Header:  header{Title: "ユーザー登録", User: u},
 		Message: "",
 	})
 	if err != nil {
@@ -23,7 +27,11 @@ func GetSignup(w http.ResponseWriter, r *http.Request) {
 func PostSignup(w http.ResponseWriter, r *http.Request) {
 	html_ok := "login.html"
 	html_ng := "signup.html"
-	err := r.ParseForm()
+	u, err := user.BuildFromContext(r.Context())
+	if err != nil {
+		log.Printf("user.BuildFromContext: %v", err)
+	}
+	err = r.ParseForm()
 	if err != nil {
 		log.Fatalf("ParseForm: %v", err)
 	}
@@ -36,7 +44,7 @@ func PostSignup(w http.ResponseWriter, r *http.Request) {
 			Header  header
 			Message string
 		}{
-			Header:  header{Title: "ユーザー登録"},
+			Header:  header{Title: "ユーザー登録", User: u},
 			Message: err.Error(),
 		})
 		if err != nil {
@@ -48,7 +56,7 @@ func PostSignup(w http.ResponseWriter, r *http.Request) {
 		Header  header
 		Message string
 	}{
-		Header:  header{Title: "ログイン"},
+		Header:  header{Title: "ログイン", User: u},
 		Message: "ユーザー作成成功。ログインしてください。",
 	})
 	if err != nil {
