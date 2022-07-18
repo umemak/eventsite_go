@@ -1,46 +1,42 @@
-<html>
-
-<body>
-    <div class="event">
-        <h1>イベント詳細</h1>
-        <ul>
-            <li>タイトル: {{ .Event.Title }}</li>
-            <li>開催日時: {{ .Event.Start }}</li>
-            <li>開催場所: {{ .Event.Place }}</li>
-            <li>
-                資料:
-                <ul>
-                    <li>資料１</li>
-                    <li>資料２</li>
-                </ul>
-            </li>
-            <li>
-                コメント:
-                <ul>
-                    <li>コメント１</li>
-                    <li>コメント２</li>
-                </ul>
-            </li>
-            <li>
-                参加者:
-                <ul>
-                    {{ range $i, $v := .EventUsers }}
-                    <li>{{ $v.Status }} : {{ $v.UserID }}</li>
-                    {{ end }}
-                </ul>
-            </li>
-        </ul>
-        <div v-if="entried">
-            <router-link custom v-slot="{ navigate }" :to="{ name: 'Cancel', params: { eventId: eventId } }">
-                <button @click="navigate">参加キャンセル</button>
-            </router-link>
-        </div>
-        <div v-else>
-            <router-link custom v-slot="{ navigate }" :to="{ name: 'Entry', params: { eventId: eventId } }">
-                <button @click="navigate">参加エントリー</button>
-            </router-link>
-        </div>
+{{template "header" .Header}}
+<div class="event">
+    <h1>イベント詳細</h1>
+    <ul>
+        <li>タイトル: {{ .Event.Title }}</li>
+        <li>開催日時: {{ .Event.Start }}</li>
+        <li>開催場所: {{ .Event.Place }}</li>
+        <li>
+            資料:
+            <ul>
+                <li>資料１</li>
+                <li>資料２</li>
+            </ul>
+        </li>
+        <li>
+            コメント:
+            <ul>
+                <li>コメント１</li>
+                <li>コメント２</li>
+            </ul>
+        </li>
+        <li>
+            参加者:
+            <ul>
+                {{ range $i, $v := .EventUsers }}
+                <li>{{ $v.Status }} : {{ $v.UserID }}</li>
+                {{ end }}
+            </ul>
+        </li>
+    </ul>
+    <div v-if="entried">
+        <router-link custom v-slot="{ navigate }" :to="{ name: 'Cancel', params: { eventId: eventId } }">
+            <button @click="navigate">参加キャンセル</button>
+        </router-link>
     </div>
-</body>
-
-</html>
+    <div v-else>
+        <router-link custom v-slot="{ navigate }" :to="{ name: 'Entry', params: { eventId: eventId } }">
+            <button @click="navigate">参加エントリー</button>
+        </router-link>
+    </div>
+</div>
+{{template "footer"}}

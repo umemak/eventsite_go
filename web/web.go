@@ -19,13 +19,19 @@ var TokenAuth = jwtauth.New("HS256", []byte("secret"), nil)
 
 var tpls = map[string]*template.Template{}
 
+type header struct {
+	Title string
+}
+
 func init() {
 	files, err := filepath.Glob(path.Join("web", "template", "*.html"))
 	if err != nil {
 		log.Fatalf("filepath.Glob: %v", err)
 	}
 	for _, file := range files {
-		tpls[filepath.Base(file)] = template.Must(template.ParseFiles(file))
+		tpls[filepath.Base(file)] = template.Must(template.ParseFiles(file,
+			path.Join("web", "template", "modules", "_header.html"),
+			path.Join("web", "template", "modules", "_footer.html")))
 	}
 }
 
@@ -46,10 +52,7 @@ func GetLogout(w http.ResponseWriter, r *http.Request) {
 		Value:    "",
 		HttpOnly: true,
 	})
-	err := tpls["index.html"].Execute(w, nil)
-	if err != nil {
-		log.Fatalf("Execute: %v", err)
-	}
+	http.Redirect(w, r, "/", 302)
 }
 
 func makeToken(user *user.User) string {

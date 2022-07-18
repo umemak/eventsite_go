@@ -4,25 +4,23 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"text/template"
 
 	"github.com/umemak/eventsite_go/model/event"
 	"github.com/umemak/eventsite_go/model/eventUser"
 )
 
 func GetEventCreate(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("web/template/event_create.html")
+	err := tpls["event_create.html"].Execute(w, struct {
+		Header header
+	}{
+		Header: header{Title: "イベント作成"},
+	})
 	if err != nil {
-		log.Fatalf("template.ParseFiles: %v", err)
+		log.Fatalf("Execute: %v", err)
 	}
-	t.Execute(w, nil)
 }
 
 func GetEventDetail(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("web/template/event_detail.html")
-	if err != nil {
-		log.Fatalf("template.ParseFiles: %v", err)
-	}
 	values := r.URL.Query()
 	id, err := strconv.ParseInt(values.Get("id"), 10, 64)
 	e, err := event.Find(id)
@@ -33,12 +31,16 @@ func GetEventDetail(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalf("event.Find: %v", err)
 	}
-	t.Execute(w, struct {
+	err = tpls["event_detail.html"].Execute(w, struct {
+		Header     header
 		Event      event.Event
 		EventUsers []eventUser.EventUser
 	}{
+		Header:     header{Title: "イベント詳細"},
 		Event:      *e,
 		EventUsers: eu,
 	})
-	t.Execute(w, nil)
+	if err != nil {
+		log.Fatalf("Execute: %v", err)
+	}
 }

@@ -101,8 +101,5 @@ func AuthViaEmail(email string, password string) (*User, error) {
 	if err != nil {
 		return nil, fmt.Errorf("dproxy: %+w", err)
 	}
-	u := &User{
-		UID: uid,
-	}
-	return u, nil
+	return GetByUID(uid)
 }

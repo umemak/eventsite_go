@@ -1,19 +1,15 @@
-<html>
-
-<body>
-    <div class="login">
-        <h1>ログイン</h1>
-        {{if .Message}}
-        <p>{{.Message}}</p>
-        {{end}}
-        <form action="./login" method="POST">
-            メールアドレス: <input type="text" name="email" /><br>
-            パスワード: <input type="password" name="password" /><br>
-            <input type="submit" value="ログイン" />
-        </form>
-        <br>
-        <a href="./signup">ユーザー登録</a>
-    </div>
-</body>
-
-</html>
+{{template "header" .Header}}
+<div class="login">
+    <h1>ログイン</h1>
+    {{if .Message}}
+    <p>{{.Message}}</p>
+    {{end}}
+    <form action="./login" method="POST">
+        メールアドレス: <input type="text" name="email" /><br>
+        パスワード: <input type="password" name="password" /><br>
+        <input type="submit" value="ログイン" />
+    </form>
+    <br>
+    <a href="./signup">ユーザー登録</a>
+</div>
+{{template "footer"}}

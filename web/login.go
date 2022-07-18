@@ -9,8 +9,10 @@ import (
 
 func GetLogin(w http.ResponseWriter, r *http.Request) {
 	err := tpls["login.html"].Execute(w, struct {
+		Header  header
 		Message string
 	}{
+		Header:  header{Title: "ログイン"},
 		Message: "",
 	})
 	if err != nil {
@@ -28,8 +30,10 @@ func PostLogin(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("AuthViaEmail: %v", err)
 		err = tpls[html_ng].Execute(w, struct {
+			Header  header
 			Message string
 		}{
+			Header:  header{Title: "ログイン"},
 			Message: err.Error(),
 		})
 		if err != nil {
@@ -37,24 +41,10 @@ func PostLogin(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	user, err := user.GetByUID(u.UID)
-	if err != nil {
-		log.Printf("user.GetByUID: %v", err)
-		err = tpls[html_ng].Execute(w, struct {
-			Message string
-		}{
-			Message: err.Error(),
-		})
-		if err != nil {
-			log.Fatalf("Execute: %v", err)
-		}
-		return
-	}
-	cookie := &http.Cookie{
+	http.SetCookie(w, &http.Cookie{
 		Name:     "jwt",
-		Value:    makeToken(user),
+		Value:    makeToken(u),
 		HttpOnly: true,
-	}
-	http.SetCookie(w, cookie)
-	http.Redirect(w, r, "/", 301)
+	})
+	http.Redirect(w, r, "/", 302)
 }

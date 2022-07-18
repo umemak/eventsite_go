@@ -1,26 +1,22 @@
-<html>
-
-<body>
-    <div class="mypage">
-        <h1>マイページ</h1>
-        <h3>作成済みイベント</h3>
-        <div v-for="item in myEvents" :key="item.id">
-            <router-link custom v-slot="{ navigate }" :to="{ name: 'Event', params: { eventId: item.id } }">
-                <button @click="navigate"></button>
-            </router-link>
-            <router-link custom v-slot="{ navigate }" :to="{ name: 'EventEdit', params: { eventId: item.id } }">
-                <button @click="navigate">編集</button>
-            </router-link>
-        </div>
-        <h3>エントリー済みイベント</h3>
-        <li>
-            <ul>
-                <li>イベント１</li>
-                <li>イベント２</li>
-            </ul>
-        </li>
-        <button @click="eventCreate">イベント作成</button>
+{{template "header" .Header}}
+<div class="mypage">
+    <h1>マイページ</h1>
+    <h3>作成済みイベント</h3>
+    <div v-for="item in myEvents" :key="item.id">
+        <router-link custom v-slot="{ navigate }" :to="{ name: 'Event', params: { eventId: item.id } }">
+            <button @click="navigate"></button>
+        </router-link>
+        <router-link custom v-slot="{ navigate }" :to="{ name: 'EventEdit', params: { eventId: item.id } }">
+            <button @click="navigate">編集</button>
+        </router-link>
     </div>
-</body>
-
-</html>
+    <h3>エントリー済みイベント</h3>
+    <li>
+        <ul>
+            <li>イベント１</li>
+            <li>イベント２</li>
+        </ul>
+    </li>
+    <button @click="eventCreate">イベント作成</button>
+</div>
+{{template "footer"}}

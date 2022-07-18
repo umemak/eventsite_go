@@ -1,13 +1,9 @@
-<html>
-
-<body>
-    <div class="search">
-        <h1>検索</h1>
-        <ul>
-            <li>キーワード: <input v-model="keyword" /></li>
-        </ul>
-        <button @click="search">検索</button>
-    </div>
-</body>
-
-</html>
+{{template "header" .Header}}
+<div class="search">
+    <h1>検索</h1>
+    <ul>
+        <li>キーワード: <input v-model="keyword" /></li>
+    </ul>
+    <button @click="search">検索</button>
+</div>
+{{template "footer"}}

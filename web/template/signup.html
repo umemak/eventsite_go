@@ -1,18 +1,14 @@
-<html>
-
-<body>
-    <div class="signup">
-        <h1>ユーザー登録</h1>
-        {{if .Message}}
-        <p>{{.Message}}</p>
-        {{end}}
-        <form action="./signup" method="POST">
-            ユーザー名: <input type="text" name="name" /><br>
-            メールアドレス: <input type="text" name="email" /><br>
-            パスワード: <input type="password" name="password" /><br>
-            <input type="submit" value="登録" />
-        </form>
-    </div>
-</body>
-
-</html>
+{{template "header" .Header}}
+<div class="signup">
+    <h1>ユーザー登録</h1>
+    {{if .Message}}
+    <p>{{.Message}}</p>
+    {{end}}
+    <form action="./signup" method="POST">
+        ユーザー名: <input type="text" name="name" /><br>
+        メールアドレス: <input type="text" name="email" /><br>
+        パスワード: <input type="password" name="password" /><br>
+        <input type="submit" value="登録" />
+    </form>
+</div>
+{{template "footer"}}

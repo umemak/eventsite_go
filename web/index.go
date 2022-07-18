@@ -21,10 +21,12 @@ func GetIndex(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("event.List: %v", err)
 	}
 	err = tpls["index.html"].Execute(w, struct {
+		Header  header
 		Events  []event.Event
 		IsLogin bool
 		Name    string
 	}{
+		Header:  header{Title: "トップ"},
 		Events:  events,
 		IsLogin: isLogin,
 		Name:    name,
