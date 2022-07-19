@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -13,13 +14,13 @@ func Open() (*sql.DB, error) {
 	if dsn == "" {
 		err := godotenv.Load()
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("godotenv.Load: %w", err)
 		}
 		dsn = os.Getenv("EVENTSITE_DSN")
 	}
 	db, err := sql.Open("mysql", dsn+"?parseTime=true&loc=Asia%2FTokyo")
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("sql.Open: %w", err)
 	}
 	return db, nil
 }

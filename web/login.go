@@ -1,6 +1,8 @@
 package web
 
 import (
+	"bytes"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -8,11 +10,13 @@ import (
 )
 
 func GetLogin(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
 	u, err := user.BuildFromContext(r.Context())
 	if err != nil {
 		log.Printf("user.BuildFromContext: %v", err)
 	}
-	err = tpls["login.html"].Execute(w, struct {
+	var buf bytes.Buffer
+	err = tpls["login.html"].Execute(&buf, struct {
 		Header  header
 		Message string
 	}{
@@ -20,11 +24,14 @@ func GetLogin(w http.ResponseWriter, r *http.Request) {
 		Message: "",
 	})
 	if err != nil {
-		log.Fatalf("Execute: %v", err)
+		http.Error(w, fmt.Sprintf("tpls.Execute: %v", err), http.StatusInternalServerError)
+		return
 	}
+	buf.WriteTo(w)
 }
 
 func PostLogin(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
 	html_ng := "login.html"
 	uh, err := user.BuildFromContext(r.Context())
 	if err != nil {
@@ -36,8 +43,8 @@ func PostLogin(w http.ResponseWriter, r *http.Request) {
 	}
 	u, err := user.AuthViaEmail(r.PostFormValue("email"), r.PostFormValue("password"))
 	if err != nil {
-		log.Printf("AuthViaEmail: %v", err)
-		err = tpls[html_ng].Execute(w, struct {
+		var buf bytes.Buffer
+		err = tpls[html_ng].Execute(&buf, struct {
 			Header  header
 			Message string
 		}{
@@ -45,8 +52,10 @@ func PostLogin(w http.ResponseWriter, r *http.Request) {
 			Message: err.Error(),
 		})
 		if err != nil {
-			log.Fatalf("Execute: %v", err)
+			http.Error(w, fmt.Sprintf("tpls.Execute: %v", err), http.StatusInternalServerError)
+			return
 		}
+		buf.WriteTo(w)
 		return
 	}
 	http.SetCookie(w, &http.Cookie{

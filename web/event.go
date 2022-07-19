@@ -1,6 +1,8 @@
 package web
 
 import (
+	"bytes"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -11,21 +13,26 @@ import (
 )
 
 func GetEventCreate(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
 	u, err := user.BuildFromContext(r.Context())
 	if err != nil {
 		log.Printf("user.BuildFromContext: %v", err)
 	}
-	err = tpls["event_create.html"].Execute(w, struct {
+	var buf bytes.Buffer
+	err = tpls["event_create.html"].Execute(&buf, struct {
 		Header header
 	}{
 		Header: header{Title: "イベント作成", User: u},
 	})
 	if err != nil {
-		log.Fatalf("Execute: %v", err)
+		http.Error(w, fmt.Sprintf("tpls.Execute: %v", err), http.StatusInternalServerError)
+		return
 	}
+	buf.WriteTo(w)
 }
 
 func GetEventDetail(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
 	u, err := user.BuildFromContext(r.Context())
 	if err != nil {
 		log.Printf("user.BuildFromContext: %v", err)
@@ -34,13 +41,16 @@ func GetEventDetail(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(values.Get("id"), 10, 64)
 	e, err := event.Find(id)
 	if err != nil {
-		log.Fatalf("event.Find: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 	eu, err := eventUser.FindByEvent(id)
 	if err != nil {
-		log.Fatalf("event.Find: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
-	err = tpls["event_detail.html"].Execute(w, struct {
+	var buf bytes.Buffer
+	err = tpls["event_detail.html"].Execute(&buf, struct {
 		Header     header
 		Event      event.Event
 		EventUsers []eventUser.EventUser
@@ -50,6 +60,8 @@ func GetEventDetail(w http.ResponseWriter, r *http.Request) {
 		EventUsers: eu,
 	})
 	if err != nil {
-		log.Fatalf("Execute: %v", err)
+		http.Error(w, fmt.Sprintf("tpls.Execute: %v", err), http.StatusInternalServerError)
+		return
 	}
+	buf.WriteTo(w)
 }

@@ -20,13 +20,13 @@ type User struct {
 func Create(email string, password string, passwordConfirm string, name string) (*User, error) {
 	body, err := pb.CreateUser(email, password, passwordConfirm)
 	if err != nil {
-		return nil, fmt.Errorf("CreateUser: %w", err)
+		return nil, fmt.Errorf("pb.CreateUser: %w", err)
 	}
 	var v any
 	json.Unmarshal(body, &v)
 	uid, err := dproxy.New(v).M("id").String()
 	if err != nil {
-		return nil, fmt.Errorf("dproxy: %w", err)
+		return nil, fmt.Errorf("dproxy.New.M.String: %w", err)
 	}
 	ret := User{UID: uid, Name: name}
 	id, err := createDB(ret)
@@ -40,17 +40,17 @@ func Create(email string, password string, passwordConfirm string, name string) 
 func createDB(u User) (int64, error) {
 	db, err := db.Open()
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("db.Open: %w", err)
 	}
 	defer db.Close()
 	stmt, err := db.Prepare("INSERT INTO user (uid, name) VALUES (?, ?)")
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("db.Prepare: %w", err)
 	}
 	defer stmt.Close()
 	res, err := stmt.Exec(u.UID, u.Name)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("stmt.Exec: %w", err)
 	}
 	return res.LastInsertId()
 }
@@ -58,19 +58,19 @@ func createDB(u User) (int64, error) {
 func List() ([]User, error) {
 	db, err := db.Open()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("db.Open: %w", err)
 	}
 	defer db.Close()
 	rows, err := db.Query("SELECT id, uid, name FROM user ORDER BY id")
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("db.Query: %w", err)
 	}
 	users := []User{}
 	for rows.Next() {
 		var u User
 		err := rows.Scan(&u.ID, &u.UID, &u.Name)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("rows.Scan: %w", err)
 		}
 		users = append(users, u)
 	}
@@ -80,14 +80,14 @@ func List() ([]User, error) {
 func GetByUID(uid string) (*User, error) {
 	db, err := db.Open()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("db.Open: %w", err)
 	}
 	defer db.Close()
 	row := db.QueryRow("SELECT id, uid, name FROM user WHERE uid = ?", uid)
 	var u User
 	err = row.Scan(&u.ID, &u.UID, &u.Name)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("row.Scan: %w", err)
 	}
 	return &u, nil
 }
@@ -95,13 +95,13 @@ func GetByUID(uid string) (*User, error) {
 func AuthViaEmail(email string, password string) (*User, error) {
 	body, err := pb.AuthViaEmail(email, password)
 	if err != nil {
-		return nil, fmt.Errorf("AuthViaEmail: %w", err)
+		return nil, fmt.Errorf("pb.AuthViaEmail: %w", err)
 	}
 	var v any
 	json.Unmarshal(body, &v)
 	uid, err := dproxy.New(v).M("user").M("id").String()
 	if err != nil {
-		return nil, fmt.Errorf("dproxy: %w", err)
+		return nil, fmt.Errorf("dproxy.New.M.M.String: %w", err)
 	}
 	return GetByUID(uid)
 }
@@ -109,7 +109,7 @@ func AuthViaEmail(email string, password string) (*User, error) {
 func BuildFromContext(ctx context.Context) (User, error) {
 	_, claims, err := jwtauth.FromContext(ctx)
 	if err != nil {
-		return User{}, fmt.Errorf("FromContext: %w", err)
+		return User{}, fmt.Errorf("jwtauth.FromContext: %w", err)
 	}
 	return User{
 		ID:   int64(claims["id"].(float64)),

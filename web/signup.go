@@ -1,6 +1,8 @@
 package web
 
 import (
+	"bytes"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -8,11 +10,13 @@ import (
 )
 
 func GetSignup(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
 	u, err := user.BuildFromContext(r.Context())
 	if err != nil {
 		log.Printf("user.BuildFromContext: %v", err)
 	}
-	err = tpls["signup.html"].Execute(w, struct {
+	var buf bytes.Buffer
+	err = tpls["signup.html"].Execute(&buf, struct {
 		Header  header
 		Message string
 	}{
@@ -20,11 +24,14 @@ func GetSignup(w http.ResponseWriter, r *http.Request) {
 		Message: "",
 	})
 	if err != nil {
-		log.Fatalf("Execute: %v", err)
+		http.Error(w, fmt.Sprintf("tpls.Execute: %v", err), http.StatusInternalServerError)
+		return
 	}
+	buf.WriteTo(w)
 }
 
 func PostSignup(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
 	html_ok := "login.html"
 	html_ng := "signup.html"
 	u, err := user.BuildFromContext(r.Context())
@@ -40,7 +47,8 @@ func PostSignup(w http.ResponseWriter, r *http.Request) {
 		r.PostFormValue("password"), r.PostFormValue("name"),
 	)
 	if err != nil {
-		err = tpls[html_ng].Execute(w, struct {
+		var buf bytes.Buffer
+		err = tpls[html_ng].Execute(&buf, struct {
 			Header  header
 			Message string
 		}{
@@ -48,11 +56,14 @@ func PostSignup(w http.ResponseWriter, r *http.Request) {
 			Message: err.Error(),
 		})
 		if err != nil {
-			log.Fatalf("Execute: %v", err)
+			http.Error(w, fmt.Sprintf("tpls.Execute: %v", err), http.StatusInternalServerError)
+			return
 		}
+		buf.WriteTo(w)
 		return
 	}
-	err = tpls[html_ok].Execute(w, struct {
+	var buf bytes.Buffer
+	err = tpls[html_ok].Execute(&buf, struct {
 		Header  header
 		Message string
 	}{
@@ -60,6 +71,8 @@ func PostSignup(w http.ResponseWriter, r *http.Request) {
 		Message: "ユーザー作成成功。ログインしてください。",
 	})
 	if err != nil {
-		log.Fatalf("Execute: %v", err)
+		http.Error(w, fmt.Sprintf("tpls.Execute: %v", err), http.StatusInternalServerError)
+		return
 	}
+	buf.WriteTo(w)
 }
