@@ -41,12 +41,12 @@ func GetEventDetail(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(values.Get("id"), 10, 64)
 	e, err := event.Find(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("event.Find: %v", err), http.StatusInternalServerError)
 		return
 	}
 	eu, err := eventUser.FindByEvent(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("eventUser.FindByEvent: %v", err), http.StatusInternalServerError)
 		return
 	}
 	var buf bytes.Buffer
