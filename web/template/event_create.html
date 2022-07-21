@@ -1,14 +1,19 @@
 {{template "header" .Header}}
 <div id="EventCreate">
     <h1>イベント作成</h1>
-    <ul>
-        <li>タイトル: <input type="text" v-model="name" /></li>
-        <li>開催日時: <input type="text" v-model="date" /></li>
-        <li>開催場所: <input type="text" v-model="place" /></li>
-        <li>
-            公開期間: <input type="text" v-model="open" />～<input type="text" v-model="close" />
-        </li>
-    </ul>
-    <button @click="createEvent">作成</button>
+    {{if .Message}}
+    <p>{{.Message}}</p>
+    {{end}}
+    <form action="./event_create" method="POST">
+        <ul>
+            <li>タイトル: <input type="text" name="title" /></li>
+            <li>開催日時: <input type="text" name="start" /></li>
+            <li>開催場所: <input type="text" name="place" /></li>
+            <li>
+                公開期間: <input type="text" name="open" />～<input type="text" name="close" />
+            </li>
+        </ul>
+        <button @click="createEvent">作成</button>
+    </form>
 </div>
 {{template "footer"}}

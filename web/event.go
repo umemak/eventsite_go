@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/umemak/eventsite_go/model/event"
 	"github.com/umemak/eventsite_go/model/eventUser"
@@ -20,7 +21,8 @@ func GetEventCreate(w http.ResponseWriter, r *http.Request) {
 	}
 	var buf bytes.Buffer
 	err = tpls["event_create.html"].Execute(&buf, struct {
-		Header header
+		Header  header
+		Message string
 	}{
 		Header: header{Title: "イベント作成", User: u},
 	})
@@ -29,6 +31,49 @@ func GetEventCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	buf.WriteTo(w)
+}
+
+func PostEventCreate(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
+	html_ng := "event_create.html"
+	u, err := user.BuildFromContext(r.Context())
+	if err != nil {
+		log.Printf("user.BuildFromContext: %v", err)
+	}
+	if u.UID == "" {
+		http.Redirect(w, r, "/login", 302)
+	}
+	err = r.ParseForm()
+	if err != nil {
+		log.Fatalf("ParseForm: %v", err)
+	}
+	now := time.Now()
+	e := event.Event{
+		Title:  r.PostFormValue("title"),
+		Start:  &now, //r.PostFormValue("start"),
+		Place:  r.PostFormValue("place"),
+		Open:   &now, //r.PostFormValue("open"),
+		Close:  &now, //r.PostFormValue("close"),
+		Author: u.ID,
+	}
+	_, err = event.Create(e)
+	if err != nil {
+		var buf bytes.Buffer
+		err = tpls[html_ng].Execute(&buf, struct {
+			Header  header
+			Message string
+		}{
+			Header:  header{Title: "イベント作成", User: u},
+			Message: err.Error(),
+		})
+		if err != nil {
+			http.Error(w, fmt.Sprintf("tpls.Execute: %v", err), http.StatusInternalServerError)
+			return
+		}
+		buf.WriteTo(w)
+		return
+	}
+	http.Redirect(w, r, "/", 302)
 }
 
 func GetEventDetail(w http.ResponseWriter, r *http.Request) {

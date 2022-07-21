@@ -8,10 +8,10 @@
 <body>
     {{if .User.Name}}
     こんにちは、{{.User.Name}}さん<br>
-    <button onclick='location.href="/logout"'>ログアウト</button>
+    <a href="/logout"'>ログアウト</a>
     {{else}}
     こんにちは、ゲストさん<br>
-    <button onclick='location.href="/login"'>ログイン</button>
+    <a href="/login"'>ログイン</a>
     {{end}}
     <br>
 {{end}}

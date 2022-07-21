@@ -10,6 +10,7 @@ type EventUser struct {
 	ID      int64
 	EventID int64
 	USerID  int64
+	Status  int
 }
 
 func Create(e EventUser) (int64, error) {
@@ -36,14 +37,14 @@ func FindByEvent(id int64) ([]EventUser, error) {
 		return nil, fmt.Errorf("db.Open: %w", err)
 	}
 	defer db.Close()
-	rows, err := db.Query("SELECT id, eventid, userid FROM eventUser WHERE eventid = ? ORDER BY id", id)
+	rows, err := db.Query("SELECT id, eventid, userid, status FROM eventUser WHERE eventid = ? ORDER BY id", id)
 	if err != nil {
 		return nil, fmt.Errorf("db.Query: %w", err)
 	}
 	eventUsers := []EventUser{}
 	for rows.Next() {
 		var e EventUser
-		err := rows.Scan(&e.ID, &e.EventID, &e.USerID)
+		err := rows.Scan(&e.ID, &e.EventID, &e.USerID, &e.Status)
 		if err != nil {
 			return nil, fmt.Errorf("rows.Scan: %w", err)
 		}

@@ -14,11 +14,13 @@ services:
       - ./db/sql:/docker-entrypoint-initdb.d
     ports:
       - 3306:3306
+
   adminer:
     image: adminer
     restart: always
     ports:
       - 8080:8080
+
   app:
     image: eventsite
     build: .

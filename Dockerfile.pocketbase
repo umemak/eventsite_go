@@ -1,9 +1,6 @@
 FROM alpine
 
-ARG PB_VERSION=0.2.8
-
-ENV TZ=Asia/Tokyo
-RUN apk --no-cache add tzdata
+ARG PB_VERSION=0.3.2
 
 WORKDIR /app
 

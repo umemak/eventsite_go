@@ -1,10 +1,12 @@
 {{template "header" .Header}}
 <div class="top">
     <h1>トップ</h1>
-    <button onclick='location.href="/search"'>検索</button><br>
+    <a href="/search"'>検索</a><br>
     <br>
     {{range $i, $v := .Events}}
-    <button onclick='location.href="/event_detail?id={{$v.ID}}"'>{{$v.Title}}@{{$v.Place}}</button><br>
+    <a href="/event_detail?id={{$v.ID}}"'>{{$v.Title}}@{{$v.Place}}</a><br>
     {{end}}
+    <br>
+    <a href="/event_create">新規イベント作成</a>
 </div>
 {{template "footer"}}

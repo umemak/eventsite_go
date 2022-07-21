@@ -28,6 +28,7 @@ func main() {
 	r.Post("/signup", web.PostSignup)
 	r.Get("/logout", web.GetLogout)
 	r.Get("/event_create", web.GetEventCreate)
+	r.Post("/event_create", web.PostEventCreate)
 	r.Get("/event_detail", web.GetEventDetail)
 
 	port := ":8081"
