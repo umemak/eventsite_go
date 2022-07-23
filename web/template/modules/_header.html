@@ -6,12 +6,11 @@
 </head>
 
 <body>
+    <a href="/">Home</a><br>
     {{if .User.Name}}
-    こんにちは、{{.User.Name}}さん<br>
-    <a href="/logout"'>ログアウト</a>
+    こんにちは、{{.User.Name}}さん <a href="/logout"'>ログアウト</a>
     {{else}}
-    こんにちは、ゲストさん<br>
-    <a href="/login"'>ログイン</a>
+    こんにちは、ゲストさん<br> <a href="/login"'>ログイン</a>
     {{end}}
     <br>
 {{end}}

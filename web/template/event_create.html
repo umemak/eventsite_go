@@ -7,13 +7,13 @@
     <form action="./event_create" method="POST">
         <ul>
             <li>タイトル: <input type="text" name="title" /></li>
-            <li>開催日時: <input type="text" name="start" /></li>
+            <li>開催日時: <input type="text" name="start" />(YYYY-MM-DD)</li>
             <li>開催場所: <input type="text" name="place" /></li>
             <li>
-                公開期間: <input type="text" name="open" />～<input type="text" name="close" />
+                公開期間: <input type="text" name="open" />～<input type="text" name="close" />(YYYY-MM-DD hh:mm)
             </li>
         </ul>
-        <button @click="createEvent">作成</button>
+        <input type="submit" value="作成"/>
     </form>
 </div>
 {{template "footer"}}

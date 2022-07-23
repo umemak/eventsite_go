@@ -35,7 +35,6 @@ func GetEventCreate(w http.ResponseWriter, r *http.Request) {
 
 func PostEventCreate(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
-	html_ng := "event_create.html"
 	u, err := user.BuildFromContext(r.Context())
 	if err != nil {
 		log.Printf("user.BuildFromContext: %v", err)
@@ -47,33 +46,57 @@ func PostEventCreate(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalf("ParseForm: %v", err)
 	}
-	now := time.Now()
-	e := event.Event{
-		Title:  r.PostFormValue("title"),
-		Start:  &now, //r.PostFormValue("start"),
-		Place:  r.PostFormValue("place"),
-		Open:   &now, //r.PostFormValue("open"),
-		Close:  &now, //r.PostFormValue("close"),
-		Author: u.ID,
+	e, err := buildEvent(r, u.ID)
+	if err != nil {
+		eventCreateFailed(w, u, err.Error())
+		return
 	}
 	_, err = event.Create(e)
 	if err != nil {
-		var buf bytes.Buffer
-		err = tpls[html_ng].Execute(&buf, struct {
-			Header  header
-			Message string
-		}{
-			Header:  header{Title: "イベント作成", User: u},
-			Message: err.Error(),
-		})
-		if err != nil {
-			http.Error(w, fmt.Sprintf("tpls.Execute: %v", err), http.StatusInternalServerError)
-			return
-		}
-		buf.WriteTo(w)
+		eventCreateFailed(w, u, err.Error())
 		return
 	}
 	http.Redirect(w, r, "/", 302)
+}
+
+func buildEvent(r *http.Request, uid int64) (event.Event, error) {
+	start, err := time.Parse("2006-01-02", r.PostFormValue("start"))
+	if err != nil {
+		return event.Event{}, fmt.Errorf("time.Parse: %w", err)
+	}
+	open, err := time.Parse("2006-01-02 15:04", r.PostFormValue("open"))
+	if err != nil {
+		return event.Event{}, fmt.Errorf("time.Parse: %w", err)
+	}
+	close, err := time.Parse("2006-01-02 15:04", r.PostFormValue("close"))
+	if err != nil {
+		return event.Event{}, fmt.Errorf("time.Parse: %w", err)
+	}
+	e := event.Event{
+		Title:  r.PostFormValue("title"),
+		Start:  &start,
+		Place:  r.PostFormValue("place"),
+		Open:   &open,
+		Close:  &close,
+		Author: uid,
+	}
+	return e, nil
+}
+
+func eventCreateFailed(w http.ResponseWriter, u user.User, errMsg string) {
+	var buf bytes.Buffer
+	err := tpls["event_create.html"].Execute(&buf, struct {
+		Header  header
+		Message string
+	}{
+		Header:  header{Title: "イベント作成", User: u},
+		Message: errMsg,
+	})
+	if err != nil {
+		http.Error(w, fmt.Sprintf("tpls.Execute: %v", err), http.StatusInternalServerError)
+		return
+	}
+	buf.WriteTo(w)
 }
 
 func GetEventDetail(w http.ResponseWriter, r *http.Request) {
