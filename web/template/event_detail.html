@@ -3,8 +3,9 @@
     <h1>イベント詳細</h1>
     <ul>
         <li>タイトル: {{ .Event.Title }}</li>
-        <li>開催日時: {{ .Event.Start }}</li>
+        <li>開催日時: {{ .Event.Start.Format "2006年01月02日" }}</li>
         <li>開催場所: {{ .Event.Place }}</li>
+        <li>公開期間: {{ .Event.Open.Format "2006年01月02日 15時04分" }} ～ {{ .Event.Close.Format "2006年01月02日 15時04分" }}</li>
         <li>
             資料:
             <ul>

@@ -18,7 +18,7 @@ func Open() (*sql.DB, error) {
 		}
 		dsn = os.Getenv("EVENTSITE_DSN")
 	}
-	db, err := sql.Open("mysql", dsn+"?parseTime=true&loc=Asia%2FTokyo")
+	db, err := sql.Open("mysql", dsn+"?parseTime=true")
 	if err != nil {
 		return nil, fmt.Errorf("sql.Open: %w", err)
 	}
