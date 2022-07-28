@@ -1,0 +1,7 @@
+version: 1
+packages:
+  - path: "sqlc"
+    name: "sqlc"
+    engine: "mysql"
+    schema: "db/sql/create_table.sql"
+    queries: "db/query.sql"

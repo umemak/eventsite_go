@@ -8,6 +8,7 @@ import (
 
 	"github.com/umemak/eventsite_go/model/event"
 	"github.com/umemak/eventsite_go/model/user"
+	"github.com/umemak/eventsite_go/sqlc"
 )
 
 func GetIndex(w http.ResponseWriter, r *http.Request) {
@@ -24,7 +25,7 @@ func GetIndex(w http.ResponseWriter, r *http.Request) {
 	var buf bytes.Buffer
 	err = tpls["index.html"].Execute(&buf, struct {
 		Header header
-		Events []event.Event
+		Events []sqlc.Event
 	}{
 		Header: header{Title: "トップ", User: u},
 		Events: events,

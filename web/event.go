@@ -11,6 +11,7 @@ import (
 	"github.com/umemak/eventsite_go/model/event"
 	"github.com/umemak/eventsite_go/model/eventUser"
 	"github.com/umemak/eventsite_go/model/user"
+	"github.com/umemak/eventsite_go/sqlc"
 )
 
 func GetEventCreate(w http.ResponseWriter, r *http.Request) {
@@ -59,25 +60,25 @@ func PostEventCreate(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", 302)
 }
 
-func buildEvent(r *http.Request, uid int64) (event.Event, error) {
+func buildEvent(r *http.Request, uid int64) (sqlc.CreateEventParams, error) {
 	start, err := time.Parse("2006-01-02", r.PostFormValue("start"))
 	if err != nil {
-		return event.Event{}, fmt.Errorf("time.Parse: %w", err)
+		return sqlc.CreateEventParams{}, fmt.Errorf("time.Parse: %w", err)
 	}
 	open, err := time.Parse("2006-01-02 15:04", r.PostFormValue("open"))
 	if err != nil {
-		return event.Event{}, fmt.Errorf("time.Parse: %w", err)
+		return sqlc.CreateEventParams{}, fmt.Errorf("time.Parse: %w", err)
 	}
 	close, err := time.Parse("2006-01-02 15:04", r.PostFormValue("close"))
 	if err != nil {
-		return event.Event{}, fmt.Errorf("time.Parse: %w", err)
+		return sqlc.CreateEventParams{}, fmt.Errorf("time.Parse: %w", err)
 	}
-	e := event.Event{
+	e := sqlc.CreateEventParams{
 		Title:  r.PostFormValue("title"),
-		Start:  &start,
+		Start:  start,
 		Place:  r.PostFormValue("place"),
-		Open:   &open,
-		Close:  &close,
+		Open:   open,
+		Close:  close,
 		Author: uid,
 	}
 	return e, nil
@@ -120,7 +121,7 @@ func GetEventDetail(w http.ResponseWriter, r *http.Request) {
 	var buf bytes.Buffer
 	err = tpls["event_detail.html"].Execute(&buf, struct {
 		Header     header
-		Event      event.Event
+		Event      sqlc.Event
 		EventUsers []eventUser.EventUser
 	}{
 		Header:     header{Title: "イベント詳細", User: u},
