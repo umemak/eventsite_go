@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/lestrrat-go/jwx/jwt"
-	"github.com/umemak/eventsite_go/model/user"
+	"github.com/umemak/eventsite_go/sqlc"
 )
 
 const PB_URL = "http://pocketbase:8090"
@@ -21,7 +21,7 @@ var tpls = map[string]*template.Template{}
 
 type header struct {
 	Title string
-	User  user.User
+	User  sqlc.User
 }
 
 func init() {
@@ -56,13 +56,10 @@ func GetLogout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", 302)
 }
 
-func makeToken(user *user.User) string {
-	if user == nil {
-		return ""
-	}
+func makeToken(user sqlc.User) string {
 	_, tokenString, _ := TokenAuth.Encode(map[string]interface{}{
 		"id":   user.ID,
-		"uid":  user.UID,
+		"uid":  user.Uid,
 		"name": user.Name,
 	})
 	return tokenString

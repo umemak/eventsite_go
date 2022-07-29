@@ -9,111 +9,95 @@ import (
 	"github.com/koron/go-dproxy"
 	"github.com/umemak/eventsite_go/db"
 	"github.com/umemak/eventsite_go/pb"
+	"github.com/umemak/eventsite_go/sqlc"
 )
 
-type User struct {
-	ID   int64
-	UID  string
-	Name string
-}
-
-func Create(email string, password string, passwordConfirm string, name string) (*User, error) {
+func Create(email string, password string, passwordConfirm string, name string) (sqlc.User, error) {
 	body, err := pb.CreateUser(email, password, passwordConfirm)
 	if err != nil {
-		return nil, fmt.Errorf("pb.CreateUser: %w", err)
+		return sqlc.User{}, fmt.Errorf("pb.CreateUser: %w", err)
 	}
 	var v any
 	json.Unmarshal(body, &v)
 	uid, err := dproxy.New(v).M("id").String()
 	if err != nil {
-		return nil, fmt.Errorf("dproxy.New.M.String: %w", err)
+		return sqlc.User{}, fmt.Errorf("dproxy.New.M.String: %w", err)
 	}
-	ret := User{UID: uid, Name: name}
+	ret := sqlc.CreateUserParams{Uid: uid, Name: name}
 	id, err := createDB(ret)
 	if err != nil {
-		return &ret, fmt.Errorf("createDB: %w", err)
+		return sqlc.User{}, fmt.Errorf("createDB: %w", err)
 	}
-	ret.ID = id
-	return &ret, nil
+	return sqlc.User{ID: id, Uid: uid, Name: name}, nil
 }
 
-func createDB(u User) (int64, error) {
+func createDB(u sqlc.CreateUserParams) (int64, error) {
 	db, err := db.Open()
 	if err != nil {
 		return 0, fmt.Errorf("db.Open: %w", err)
 	}
 	defer db.Close()
-	stmt, err := db.Prepare("INSERT INTO user (uid, name) VALUES (?, ?)")
+	queries := sqlc.New(db)
+	ctx := context.Background()
+	res, err := queries.CreateUser(ctx, u)
 	if err != nil {
-		return 0, fmt.Errorf("db.Prepare: %w", err)
-	}
-	defer stmt.Close()
-	res, err := stmt.Exec(u.UID, u.Name)
-	if err != nil {
-		return 0, fmt.Errorf("stmt.Exec: %w", err)
+		return 0, fmt.Errorf("queries.CreateUser: %w", err)
 	}
 	return res.LastInsertId()
 }
 
-func List() ([]User, error) {
+func List() ([]sqlc.User, error) {
 	db, err := db.Open()
 	if err != nil {
 		return nil, fmt.Errorf("db.Open: %w", err)
 	}
 	defer db.Close()
-	rows, err := db.Query("SELECT id, uid, name FROM user ORDER BY id")
+	queries := sqlc.New(db)
+	ctx := context.Background()
+	users, err := queries.ListUsers(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("db.Query: %w", err)
-	}
-	users := []User{}
-	for rows.Next() {
-		var u User
-		err := rows.Scan(&u.ID, &u.UID, &u.Name)
-		if err != nil {
-			return nil, fmt.Errorf("rows.Scan: %w", err)
-		}
-		users = append(users, u)
+		return nil, fmt.Errorf("queries.ListUsers: %w", err)
 	}
 	return users, nil
 }
 
-func GetByUID(uid string) (*User, error) {
+func GetByUID(uid string) (sqlc.User, error) {
 	db, err := db.Open()
 	if err != nil {
-		return nil, fmt.Errorf("db.Open: %w", err)
+		return sqlc.User{}, fmt.Errorf("db.Open: %w", err)
 	}
 	defer db.Close()
-	row := db.QueryRow("SELECT id, uid, name FROM user WHERE uid = ?", uid)
-	var u User
-	err = row.Scan(&u.ID, &u.UID, &u.Name)
+	queries := sqlc.New(db)
+	ctx := context.Background()
+	u, err := queries.GetUserByUID(ctx, uid)
 	if err != nil {
-		return nil, fmt.Errorf("row.Scan: %w", err)
+		return sqlc.User{}, fmt.Errorf("queries.ListUsers: %w", err)
 	}
-	return &u, nil
+	return u, nil
 }
 
-func AuthViaEmail(email string, password string) (*User, error) {
+func AuthViaEmail(email string, password string) (sqlc.User, error) {
 	body, err := pb.AuthViaEmail(email, password)
 	if err != nil {
-		return nil, fmt.Errorf("pb.AuthViaEmail: %w", err)
+		return sqlc.User{}, fmt.Errorf("pb.AuthViaEmail: %w", err)
 	}
 	var v any
 	json.Unmarshal(body, &v)
 	uid, err := dproxy.New(v).M("user").M("id").String()
 	if err != nil {
-		return nil, fmt.Errorf("dproxy.New.M.M.String: %w", err)
+		return sqlc.User{}, fmt.Errorf("dproxy.New.M.M.String: %w", err)
 	}
 	return GetByUID(uid)
 }
 
-func BuildFromContext(ctx context.Context) (User, error) {
+func BuildFromContext(ctx context.Context) (sqlc.User, error) {
 	_, claims, err := jwtauth.FromContext(ctx)
 	if err != nil {
-		return User{}, fmt.Errorf("jwtauth.FromContext: %w", err)
+		return sqlc.User{}, fmt.Errorf("jwtauth.FromContext: %w", err)
 	}
-	return User{
+	return sqlc.User{
 		ID:   int64(claims["id"].(float64)),
-		UID:  claims["uid"].(string),
+		Uid:  claims["uid"].(string),
 		Name: claims["name"].(string),
 	}, err
 }

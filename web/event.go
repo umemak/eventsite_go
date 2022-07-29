@@ -40,7 +40,7 @@ func PostEventCreate(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("user.BuildFromContext: %v", err)
 	}
-	if u.UID == "" {
+	if u.Uid == "" {
 		http.Redirect(w, r, "/login", 302)
 	}
 	err = r.ParseForm()
@@ -84,7 +84,7 @@ func buildEvent(r *http.Request, uid int64) (sqlc.CreateEventParams, error) {
 	return e, nil
 }
 
-func eventCreateFailed(w http.ResponseWriter, u user.User, errMsg string) {
+func eventCreateFailed(w http.ResponseWriter, u sqlc.User, errMsg string) {
 	var buf bytes.Buffer
 	err := tpls["event_create.html"].Execute(&buf, struct {
 		Header  header
@@ -122,10 +122,10 @@ func GetEventDetail(w http.ResponseWriter, r *http.Request) {
 	err = tpls["event_detail.html"].Execute(&buf, struct {
 		Header     header
 		Event      sqlc.Event
-		EventUsers []eventUser.EventUser
+		EventUsers []sqlc.Eventuser
 	}{
 		Header:     header{Title: "イベント詳細", User: u},
-		Event:      *e,
+		Event:      e,
 		EventUsers: eu,
 	})
 	if err != nil {

@@ -38,17 +38,17 @@ func List() ([]sqlc.Event, error) {
 	return events, nil
 }
 
-func Find(id int64) (*sqlc.Event, error) {
+func Find(id int64) (sqlc.Event, error) {
 	db, err := db.Open()
 	if err != nil {
-		return nil, fmt.Errorf("db.Open: %w", err)
+		return sqlc.Event{}, fmt.Errorf("db.Open: %w", err)
 	}
 	defer db.Close()
 	queries := sqlc.New(db)
 	ctx := context.Background()
 	event, err := queries.GetEvent(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("queries.GetEvent: %w", err)
+		return sqlc.Event{}, fmt.Errorf("queries.GetEvent: %w", err)
 	}
-	return &event, nil
+	return event, nil
 }

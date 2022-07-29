@@ -35,6 +35,32 @@ func (q *Queries) CreateEvent(ctx context.Context, arg CreateEventParams) (sql.R
 	)
 }
 
+const createEventUser = `-- name: CreateEventUser :execresult
+INSERT INTO eventUser (eventid, userid) VALUES (?, ?)
+`
+
+type CreateEventUserParams struct {
+	Eventid int64
+	Userid  int64
+}
+
+func (q *Queries) CreateEventUser(ctx context.Context, arg CreateEventUserParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, createEventUser, arg.Eventid, arg.Userid)
+}
+
+const createUser = `-- name: CreateUser :execresult
+INSERT INTO user (uid, name) VALUES (?, ?)
+`
+
+type CreateUserParams struct {
+	Uid  string
+	Name string
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, createUser, arg.Uid, arg.Name)
+}
+
 const getEvent = `-- name: GetEvent :one
 SELECT id, title, start, place, open, close, author FROM event WHERE id = ? LIMIT 1
 `
@@ -54,16 +80,47 @@ func (q *Queries) GetEvent(ctx context.Context, id int64) (Event, error) {
 	return i, err
 }
 
-const getUser = `-- name: GetUser :one
-SELECT id, uid, name FROM user
-WHERE id = ? LIMIT 1
+const getUserByUID = `-- name: GetUserByUID :one
+SELECT id, uid, name FROM user WHERE uid = ? LIMIT 1
 `
 
-func (q *Queries) GetUser(ctx context.Context, id int64) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUser, id)
+func (q *Queries) GetUserByUID(ctx context.Context, uid string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByUID, uid)
 	var i User
 	err := row.Scan(&i.ID, &i.Uid, &i.Name)
 	return i, err
+}
+
+const listEventUsers = `-- name: ListEventUsers :many
+SELECT id, eventid, userid, status FROM eventUser WHERE eventid = ? ORDER BY id
+`
+
+func (q *Queries) ListEventUsers(ctx context.Context, eventid int64) ([]Eventuser, error) {
+	rows, err := q.db.QueryContext(ctx, listEventUsers, eventid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Eventuser
+	for rows.Next() {
+		var i Eventuser
+		if err := rows.Scan(
+			&i.ID,
+			&i.Eventid,
+			&i.Userid,
+			&i.Status,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listEvents = `-- name: ListEvents :many
@@ -88,6 +145,33 @@ func (q *Queries) ListEvents(ctx context.Context) ([]Event, error) {
 			&i.Close,
 			&i.Author,
 		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listUsers = `-- name: ListUsers :many
+SELECT id, uid, name FROM user ORDER BY id
+`
+
+func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
+	rows, err := q.db.QueryContext(ctx, listUsers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(&i.ID, &i.Uid, &i.Name); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
