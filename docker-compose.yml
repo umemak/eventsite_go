@@ -29,6 +29,16 @@ services:
     volumes:
       - .:/app
 
+  api:
+    image: eventsite
+    build: .
+    container_name: api
+    ports:
+      - 8082:8082
+    volumes:
+      - .:/app
+    command: air -c /app/.air_api.toml
+
   pocketbase:
     image: pocketbase:local
     build:
