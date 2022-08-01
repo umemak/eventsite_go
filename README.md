@@ -5,25 +5,28 @@ graph TB
 
 user --> WebApp
 
-admin -- :8080 --> adminer
-
 WebApp -- :8081 --> API
 
-subgraph Docker-compose
+subgraph backend
+  developer --> DDL
+  developer --> SQL
+  developer --> OpenAPI.yml
+  OpenAPI.yml -.-> openapi-generator
+  SQL -.-> sqlc
+  DDL -.-> sqlc
+  sqlc -.-> API
+  admin -- :8080 --> adminer
   API -- :3306 --> MySQL
   adminer -- :3306 --> MySQL
 end
 
-subgraph dev
-  developer --> DDL
-  developer --> SQL
-  developer --> OpenAPI.yml
+subgraph frontend
+  FEdeveloper --> WebApp
 end
 
-OpenAPI.yml -- server --> API
-OpenAPI.yml -- client --> WebApp
-SQL -- sqlc --> API
-DDL -- sqlc --> API
+openapi-generator -. server .-> API
+openapi-generator -. client .-> WebApp
+
 DDL --> MySQL
 ```
 
