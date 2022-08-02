@@ -18,6 +18,11 @@ subgraph backend
   admin -- :8080 --> adminer
   API -- :3306 --> MySQL
   adminer -- :3306 --> MySQL
+  subgraph docker-compose
+    MySQL
+    API
+    adminer
+  end
 end
 
 subgraph frontend
