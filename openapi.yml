@@ -19,6 +19,19 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Event'
+    post:
+      tags:
+        - events
+      summary: Create event.
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+      responses:
+        '201':
+          description: CREATED
 
 components:
   schemas:

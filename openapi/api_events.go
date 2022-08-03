@@ -10,6 +10,7 @@
 package openapi
 
 import (
+	"encoding/json"
 	"net/http"
 	"strings"
 )
@@ -53,12 +54,42 @@ func (c *EventsApiController) Routes() Routes {
 			"/v1/events",
 			c.EventsGet,
 		},
+		{
+			"EventsPost",
+			strings.ToUpper("Post"),
+			"/v1/events",
+			c.EventsPost,
+		},
 	}
 }
 
 // EventsGet - Get all events.
 func (c *EventsApiController) EventsGet(w http.ResponseWriter, r *http.Request) {
 	result, err := c.service.EventsGet(r.Context())
+	// If an error occurred, encode the error with the status code
+	if err != nil {
+		c.errorHandler(w, r, err, &result)
+		return
+	}
+	// If no error, encode the body and the result code
+	EncodeJSONResponse(result.Body, &result.Code, w)
+
+}
+
+// EventsPost - Create event.
+func (c *EventsApiController) EventsPost(w http.ResponseWriter, r *http.Request) {
+	eventParam := Event{}
+	d := json.NewDecoder(r.Body)
+	d.DisallowUnknownFields()
+	if err := d.Decode(&eventParam); err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		return
+	}
+	if err := AssertEventRequired(eventParam); err != nil {
+		c.errorHandler(w, r, err, nil)
+		return
+	}
+	result, err := c.service.EventsPost(r.Context(), eventParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result)

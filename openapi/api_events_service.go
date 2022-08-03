@@ -43,3 +43,25 @@ func (s *EventsApiService) EventsGet(ctx context.Context) (ImplResponse, error) 
 	}
 	return Response(http.StatusOK, events), nil
 }
+
+// EventsPost - Create event.
+func (s *EventsApiService) EventsPost(ctx context.Context, event Event) (ImplResponse, error) {
+	db, err := db.Open()
+	if err != nil {
+		return Response(500, nil), fmt.Errorf("db.Open: %w", err)
+	}
+	defer db.Close()
+	queries := sqlc.New(db)
+	_, err = queries.CreateEvent(ctx, sqlc.CreateEventParams{
+		Title:  event.Title,
+		Start:  event.Open,
+		Place:  event.Place,
+		Open:   event.Open,
+		Close:  event.Close,
+		Author: event.Author,
+	})
+	if err != nil {
+		return Response(500, nil), fmt.Errorf("queries.CreateEvent: %w", err)
+	}
+	return Response(http.StatusCreated, nil), nil
+}
