@@ -30,6 +30,8 @@ func main() {
 	r.Get("/event_create", web.GetEventCreate)
 	r.Post("/event_create", web.PostEventCreate)
 	r.Get("/event_detail", web.GetEventDetail)
+	r.Get("/event_entry", web.GetEventEntry)
+	r.Get("/event_cancel", web.GetEventCancel)
 
 	port := ":8081"
 	log.Printf("http://localhost%s", port)

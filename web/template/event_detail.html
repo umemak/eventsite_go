@@ -24,20 +24,15 @@
             参加者:
             <ul>
                 {{ range $i, $v := .EventUsers }}
-                <li>{{ $v.Status }} : {{ $v.UserID }}</li>
+                <li>{{ if eq $v.Status 0 }}参加{{else}}キャンセル{{end}} : {{ $v.Name }}(@{{ $v.Userid }})</li>
                 {{ end }}
             </ul>
         </li>
     </ul>
-    <div v-if="entried">
-        <router-link custom v-slot="{ navigate }" :to="{ name: 'Cancel', params: { eventId: eventId } }">
-            <button @click="navigate">参加キャンセル</button>
-        </router-link>
-    </div>
-    <div v-else>
-        <router-link custom v-slot="{ navigate }" :to="{ name: 'Entry', params: { eventId: eventId } }">
-            <button @click="navigate">参加エントリー</button>
-        </router-link>
-    </div>
+    {{if eq .Entried 0}}
+    <a href="/event_cancel?id={{.Event.ID}}">参加キャンセル</a>
+    {{else}}
+    <a href="/event_entry?id={{.Event.ID}}">参加エントリー</a>
+    {{end}}
 </div>
 {{template "footer"}}

@@ -8,10 +8,19 @@ SELECT id, title, start, place, open, close, author FROM event ORDER BY id;
 SELECT id, title, start, place, open, close, author FROM event WHERE id = ? LIMIT 1;
 
 -- name: CreateEventUser :execresult
-INSERT INTO eventUser (eventid, userid) VALUES (?, ?);
+INSERT INTO eventUser (eventid, userid, `status`) VALUES (?, ?, ?);
 
 -- name: ListEventUsers :many
-SELECT id, eventid, userid, status FROM eventUser WHERE eventid = ? ORDER BY id;
+SELECT eu.id, eu.eventid, eu.userid, eu.`status`, u.name
+FROM (
+    SELECT id, eventid, userid, `status`,
+    row_number() OVER (PARTITION BY eventid, userid ORDER BY id DESC) AS num
+    FROM eventUser
+) eu, user u
+WHERE eu.eventid = ?
+  AND eu.num = 1
+  AND eu.userid = u.id
+ORDER BY eu.id;
 
 -- name: CreateUser :execresult
 INSERT INTO user (uid, name) VALUES (?, ?);

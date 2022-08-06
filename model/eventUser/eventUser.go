@@ -23,7 +23,7 @@ func Create(e sqlc.CreateEventUserParams) (int64, error) {
 	return res.LastInsertId()
 }
 
-func FindByEvent(id int64) ([]sqlc.Eventuser, error) {
+func FindByEvent(id int64) ([]sqlc.ListEventUsersRow, error) {
 	db, err := db.Open()
 	if err != nil {
 		return nil, fmt.Errorf("db.Open: %w", err)

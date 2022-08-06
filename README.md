@@ -51,3 +51,11 @@ docker run --rm \
 ```sh
 sqlc generate
 ```
+
+### Install sqlc
+
+```sh
+go install github.com/kyleconroy/sqlc/cmd/sqlc@v1.10.0
+```
+
+https://github.com/kyleconroy/sqlc/issues/1385

@@ -108,6 +108,10 @@ func GetEventDetail(w http.ResponseWriter, r *http.Request) {
 	}
 	values := r.URL.Query()
 	id, err := strconv.ParseInt(values.Get("id"), 10, 64)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("strconv.ParseInt: %v", err), http.StatusInternalServerError)
+		return
+	}
 	e, err := event.Find(id)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("event.Find: %v", err), http.StatusInternalServerError)
@@ -118,19 +122,75 @@ func GetEventDetail(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("eventUser.FindByEvent: %v", err), http.StatusInternalServerError)
 		return
 	}
+	entried := int32(0)
+	for _, v := range eu {
+		if v.Userid == u.ID {
+			entried = v.Status
+			break
+		}
+	}
 	var buf bytes.Buffer
 	err = tpls["event_detail.html"].Execute(&buf, struct {
 		Header     header
 		Event      sqlc.Event
-		EventUsers []sqlc.Eventuser
+		EventUsers []sqlc.ListEventUsersRow
+		Entried    int32
 	}{
 		Header:     header{Title: "イベント詳細", User: u},
 		Event:      e,
 		EventUsers: eu,
+		Entried:    entried,
 	})
 	if err != nil {
 		http.Error(w, fmt.Sprintf("tpls.Execute: %v", err), http.StatusInternalServerError)
 		return
 	}
 	buf.WriteTo(w)
+}
+
+func GetEventEntry(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
+	u, err := user.BuildFromContext(r.Context())
+	if err != nil {
+		log.Printf("user.BuildFromContext: %v", err)
+	}
+	values := r.URL.Query()
+	id, err := strconv.ParseInt(values.Get("id"), 10, 64)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("strconv.ParseInt: %v", err), http.StatusInternalServerError)
+		return
+	}
+	_, err = eventUser.Create(sqlc.CreateEventUserParams{
+		Eventid: id,
+		Userid:  u.ID,
+	})
+	if err != nil {
+		http.Error(w, fmt.Sprintf("eventUser.Create: %v", err), http.StatusInternalServerError)
+		return
+	}
+	GetEventDetail(w, r)
+}
+
+func GetEventCancel(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
+	u, err := user.BuildFromContext(r.Context())
+	if err != nil {
+		log.Printf("user.BuildFromContext: %v", err)
+	}
+	values := r.URL.Query()
+	id, err := strconv.ParseInt(values.Get("id"), 10, 64)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("strconv.ParseInt: %v", err), http.StatusInternalServerError)
+		return
+	}
+	_, err = eventUser.Create(sqlc.CreateEventUserParams{
+		Eventid: id,
+		Userid:  u.ID,
+		Status:  1,
+	})
+	if err != nil {
+		http.Error(w, fmt.Sprintf("eventUser.Create: %v", err), http.StatusInternalServerError)
+		return
+	}
+	GetEventDetail(w, r)
 }
