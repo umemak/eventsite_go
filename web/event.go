@@ -122,24 +122,25 @@ func GetEventDetail(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("eventUser.FindByEvent: %v", err), http.StatusInternalServerError)
 		return
 	}
-	entried := int32(0)
+	cancelled := false
 	for _, v := range eu {
-		if v.Userid == u.ID {
-			entried = v.Status
+		if v.UserID == u.ID {
+			cancelled = v.Cancelled
 			break
 		}
 	}
+	log.Printf("cancelled: %+v", cancelled)
 	var buf bytes.Buffer
 	err = tpls["event_detail.html"].Execute(&buf, struct {
 		Header     header
 		Event      sqlc.Event
 		EventUsers []sqlc.ListEventUsersRow
-		Entried    int32
+		Cancelled  bool
 	}{
 		Header:     header{Title: "イベント詳細", User: u},
 		Event:      e,
 		EventUsers: eu,
-		Entried:    entried,
+		Cancelled:  cancelled,
 	})
 	if err != nil {
 		http.Error(w, fmt.Sprintf("tpls.Execute: %v", err), http.StatusInternalServerError)
@@ -161,8 +162,9 @@ func GetEventEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	_, err = eventUser.Create(sqlc.CreateEventUserParams{
-		Eventid: id,
-		Userid:  u.ID,
+		EventID:   id,
+		UserID:    u.ID,
+		Cancelled: false,
 	})
 	if err != nil {
 		http.Error(w, fmt.Sprintf("eventUser.Create: %v", err), http.StatusInternalServerError)
@@ -184,9 +186,9 @@ func GetEventCancel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	_, err = eventUser.Create(sqlc.CreateEventUserParams{
-		Eventid: id,
-		Userid:  u.ID,
-		Status:  1,
+		EventID:   id,
+		UserID:    u.ID,
+		Cancelled: true,
 	})
 	if err != nil {
 		http.Error(w, fmt.Sprintf("eventUser.Create: %v", err), http.StatusInternalServerError)

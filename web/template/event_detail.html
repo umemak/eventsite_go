@@ -24,12 +24,12 @@
             参加者:
             <ul>
                 {{ range $i, $v := .EventUsers }}
-                <li>{{ if eq $v.Status 0 }}参加{{else}}キャンセル{{end}} : {{ $v.Name }}(@{{ $v.Userid }})</li>
+                <li>{{ if eq $v.Cancelled false }}参加{{else}}キャンセル{{end}} : {{ $v.Name }}(@{{ $v.UserID }})</li>
                 {{ end }}
             </ul>
         </li>
     </ul>
-    {{if eq .Entried 0}}
+    {{if eq .Cancelled false}}
     <a href="/event_cancel?id={{.Event.ID}}">参加キャンセル</a>
     {{else}}
     <a href="/event_entry?id={{.Event.ID}}">参加エントリー</a>

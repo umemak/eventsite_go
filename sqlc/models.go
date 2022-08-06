@@ -3,15 +3,17 @@
 package sqlc
 
 import (
+	"database/sql"
 	"time"
 )
 
 type Comment struct {
 	ID       int64
-	Eventid  int64
-	Userid   int64
+	ParentID sql.NullInt64
+	EventID  int64
+	UserID   int64
 	Comment  string
-	Postedat time.Time
+	PostedAt time.Time
 }
 
 type Event struct {
@@ -24,16 +26,16 @@ type Event struct {
 	Author int64
 }
 
-type EventUser struct {
-	ID      int64
-	Eventid int64
-	Userid  int64
-	Status  int32
+type EventsUser struct {
+	ID        int64
+	EventID   int64
+	UserID    int64
+	Cancelled bool
 }
 
 type Upload struct {
 	ID      int64
-	Eventid int64
+	EventID int64
 	Url     string
 }
 

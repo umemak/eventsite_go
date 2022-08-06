@@ -10,7 +10,7 @@ import (
 )
 
 const createEvent = `-- name: CreateEvent :execresult
-INSERT INTO event (title, start, place, open, close, author) VALUES (?, ?, ?, ?, ?, ?)
+INSERT INTO events (title, start, place, open, close, author) VALUES (?, ?, ?, ?, ?, ?)
 `
 
 type CreateEventParams struct {
@@ -34,21 +34,21 @@ func (q *Queries) CreateEvent(ctx context.Context, arg CreateEventParams) (sql.R
 }
 
 const createEventUser = `-- name: CreateEventUser :execresult
-INSERT INTO eventUser (eventid, userid, ` + "`" + `status` + "`" + `) VALUES (?, ?, ?)
+INSERT INTO events_users (event_id, user_id, cancelled) VALUES (?, ?, ?)
 `
 
 type CreateEventUserParams struct {
-	Eventid int64
-	Userid  int64
-	Status  int32
+	EventID   int64
+	UserID    int64
+	Cancelled bool
 }
 
 func (q *Queries) CreateEventUser(ctx context.Context, arg CreateEventUserParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, createEventUser, arg.Eventid, arg.Userid, arg.Status)
+	return q.db.ExecContext(ctx, createEventUser, arg.EventID, arg.UserID, arg.Cancelled)
 }
 
 const createUser = `-- name: CreateUser :execresult
-INSERT INTO user (uid, name) VALUES (?, ?)
+INSERT INTO users (uid, name) VALUES (?, ?)
 `
 
 type CreateUserParams struct {
@@ -61,7 +61,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (sql.Res
 }
 
 const getEvent = `-- name: GetEvent :one
-SELECT id, title, start, place, open, close, author FROM event WHERE id = ? LIMIT 1
+SELECT id, title, start, place, open, close, author FROM events WHERE id = ? LIMIT 1
 `
 
 func (q *Queries) GetEvent(ctx context.Context, id int64) (Event, error) {
@@ -80,7 +80,7 @@ func (q *Queries) GetEvent(ctx context.Context, id int64) (Event, error) {
 }
 
 const getUserByUID = `-- name: GetUserByUID :one
-SELECT id, uid, name FROM user WHERE uid = ? LIMIT 1
+SELECT id, uid, name FROM users WHERE uid = ? LIMIT 1
 `
 
 func (q *Queries) GetUserByUID(ctx context.Context, uid string) (User, error) {
@@ -91,28 +91,28 @@ func (q *Queries) GetUserByUID(ctx context.Context, uid string) (User, error) {
 }
 
 const listEventUsers = `-- name: ListEventUsers :many
-SELECT eu.id, eu.eventid, eu.userid, eu.` + "`" + `status` + "`" + `, u.name
+SELECT eu.id, eu.event_id, eu.user_id, eu.cancelled, u.name
 FROM (
-    SELECT id, eventid, userid, ` + "`" + `status` + "`" + `,
-    row_number() OVER (PARTITION BY eventid, userid ORDER BY id DESC) AS num
-    FROM eventUser
-) eu, user u
-WHERE eu.eventid = ?
+    SELECT id, event_id, user_id, cancelled,
+    row_number() OVER (PARTITION BY event_id, user_id ORDER BY id DESC) AS num
+    FROM events_users
+) eu, users u
+WHERE eu.event_id = ?
   AND eu.num = 1
-  AND eu.userid = u.id
+  AND eu.user_id = u.id
 ORDER BY eu.id
 `
 
 type ListEventUsersRow struct {
-	ID      int64
-	Eventid int64
-	Userid  int64
-	Status  int32
-	Name    string
+	ID        int64
+	EventID   int64
+	UserID    int64
+	Cancelled bool
+	Name      string
 }
 
-func (q *Queries) ListEventUsers(ctx context.Context, eventid int64) ([]ListEventUsersRow, error) {
-	rows, err := q.db.QueryContext(ctx, listEventUsers, eventid)
+func (q *Queries) ListEventUsers(ctx context.Context, eventID int64) ([]ListEventUsersRow, error) {
+	rows, err := q.db.QueryContext(ctx, listEventUsers, eventID)
 	if err != nil {
 		return nil, err
 	}
@@ -122,9 +122,9 @@ func (q *Queries) ListEventUsers(ctx context.Context, eventid int64) ([]ListEven
 		var i ListEventUsersRow
 		if err := rows.Scan(
 			&i.ID,
-			&i.Eventid,
-			&i.Userid,
-			&i.Status,
+			&i.EventID,
+			&i.UserID,
+			&i.Cancelled,
 			&i.Name,
 		); err != nil {
 			return nil, err
@@ -141,7 +141,7 @@ func (q *Queries) ListEventUsers(ctx context.Context, eventid int64) ([]ListEven
 }
 
 const listEvents = `-- name: ListEvents :many
-SELECT id, title, start, place, open, close, author FROM event ORDER BY id
+SELECT id, title, start, place, open, close, author FROM events ORDER BY id
 `
 
 func (q *Queries) ListEvents(ctx context.Context) ([]Event, error) {
@@ -176,7 +176,7 @@ func (q *Queries) ListEvents(ctx context.Context) ([]Event, error) {
 }
 
 const listUsers = `-- name: ListUsers :many
-SELECT id, uid, name FROM user ORDER BY id
+SELECT id, uid, name FROM users ORDER BY id
 `
 
 func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
