@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package eventsite.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "eventsite/gen/eventsite/v1;eventsitev1";
+
+message GetEventsRequest { int64 id = 1; }
+
+message CreateEventsRequest { int64 id = 1; }
+
+message EventsMessage { int64 id = 1; }
+
+service EventsiteService {
+  // Get all events.
+  rpc GetEvents(GetEventsRequest) returns (EventsMessage) {
+    option (google.api.http) = {
+      get : "/example-messages/{id}"
+    };
+  }
+
+  // Create event.
+  rpc PostEvents(CreateEventsRequest) returns (EventsMessage) {}
+}

@@ -19,19 +19,22 @@ services:
     image: adminer
     restart: always
     ports:
-      - 8080:8080
+      - 8083:8080
 
   app:
-    image: eventsite
-    build: .
+    build:
+      target: air
+      context: .
+    container_name: app
     ports:
       - 8081:8081
     volumes:
       - .:/app
 
   api:
-    image: eventsite
-    build: .
+    build:
+      target: air
+      context: .
     container_name: api
     ports:
       - 8082:8082
@@ -51,3 +54,36 @@ services:
       - ./pb_data:/app/pb_data
     ports:
       - 8090:8090
+
+  dev:
+    build:
+      target: dev
+      context: .
+    volumes:
+      - .:/work
+    tty: true
+
+  grpc-server:
+    build:
+      target: server-runner
+      context: .
+    ports:
+      - 50051:50051
+
+  gateway-server:
+    build:
+      target: gateway-runner
+      context: .
+    ports:
+      - 8080:8080
+
+  docs-server:
+    # swagger-ui's document url:
+    #   https://swagger.io/docs/open-source-tools/swagger-ui/usage/installation/
+    #   https://swagger.io/docs/open-source-tools/swagger-ui/usage/configuration/
+    image: swaggerapi/swagger-ui
+    environment:
+      SWAGGER_JSON: /gen/openapiv2/apidocs.swagger.json
+      BASE_URL: /docs
+    volumes:
+      - ./gen/openapiv2/eventsite/v1/event.swagger.json:/gen/openapiv2/apidocs.swagger.json

@@ -1,0 +1,14 @@
+version: v1
+plugins:
+  - name: go
+    out: gen
+    opt: paths=source_relative
+  - name: connect-go
+    out: gen
+    opt: paths=source_relative
+  - name: openapiv2
+    out: gen/openapiv2
+  - name: grpc-gateway
+    out: gen/go
+    opt:
+      - paths=source_relative
