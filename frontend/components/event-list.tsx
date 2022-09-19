@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react'
-import { EventsApi } from '../openapi'
-import { Event as EventModel } from '../openapi'
+import { EventsApi, Event } from '../openapi'
 
-const Event = () => {
+const EventList = () => {
     const [error, setError] = useState(null);
     const [isLoaded, setIsLoaded] = useState(false);
-    const [events, setEvents] = useState<EventModel[]>([]);
+    const [events, setEvents] = useState<Event[]>([]);
     const eventsApi = new EventsApi();
 
     useEffect(() => {
@@ -40,4 +39,4 @@ const Event = () => {
     }
 }
 
-export default Event
+export default EventList
