@@ -41,7 +41,19 @@ func (s *EventsApiService) EventsGet(ctx context.Context) (ImplResponse, error) 
 	if err != nil {
 		return Response(500, nil), fmt.Errorf("queries.ListEvents: %w", err)
 	}
-	return Response(http.StatusOK, events), nil
+	res := []Event{}
+	for _, v := range events {
+		res = append(res, Event{
+			Id:     v.ID,
+			Title:  v.Title,
+			Start:  v.Start,
+			Place:  v.Place,
+			Open:   v.Open,
+			Close:  v.Close,
+			Author: v.Author,
+		})
+	}
+	return Response(http.StatusOK, res), nil
 }
 
 // EventsPost - Create event.

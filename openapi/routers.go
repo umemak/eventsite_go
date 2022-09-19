@@ -21,6 +21,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 )
 
 // A Route defines the parameters for an api endpoint
@@ -45,6 +46,9 @@ const errMsgRequiredMissing = "required parameter is missing"
 func NewRouter(routers ...Router) chi.Router {
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)
+	router.Use(cors.Handler(cors.Options{
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+	}))
 	for _, api := range routers {
 		for _, route := range api.Routes() {
 			var handler http.Handler

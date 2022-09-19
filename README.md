@@ -42,9 +42,29 @@ docker run --rm \
   -v ${PWD}:/local openapitools/openapi-generator-cli generate \
   -i /local/openapi.yml \
   -g go-server \
-  --additional-properties=router=chi \
+  --additional-properties=router=chi,featureCORS=true \
   -o /local/out
 ```
+
+## Generate Frontend
+
+```sh
+npx create-next-app@latest --ts frontend
+```
+
+## Generate OpenAPI Client
+
+```sh
+docker run --rm \
+  -v "${PWD}:/local" openapitools/openapi-generator-cli generate \
+  -i /local/openapi.yml \
+  -g typescript-axios \
+  -o /local/frontend/openapi
+```
+  --additional-properties=modelPropertyNaming=camelCase,supportsES6=true,withInterfaces=true,typescriptThreePlus=true \
+
+参考
+- https://zenn.dev/erukiti/articles/openapi-generator-typescript-fetch
 
 ## Generate sqlc
 
