@@ -6,9 +6,10 @@ import {
     getCoreRowModel,
     useReactTable,
 } from '@tanstack/react-table'
+import axios,{AxiosError} from 'axios';
 
 const EventTable = () => {
-    const [error, setError] = useState(null);
+    const [error, setError] = useState<AxiosError>();
     const [isLoaded, setIsLoaded] = useState(true);
     const [events, setEvents] = useState<Event[]>([]);
     const eventsApi = new EventsApi();
@@ -55,8 +56,10 @@ const EventTable = () => {
                     setEvents(data);
                 },
                 (error) => {
-                    setIsLoaded(true);
-                    setError(error);
+                    if (axios.isAxiosError(error)) {
+                        setIsLoaded(true);
+                        setError(error);
+                    }
                 }
             )
     }, [])
