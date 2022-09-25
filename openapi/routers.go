@@ -12,6 +12,7 @@ package openapi
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
@@ -63,6 +64,12 @@ func NewRouter(routers ...Router) chi.Router {
 // EncodeJSONResponse uses the json encoder to write an interface to the http response with an optional status code
 func EncodeJSONResponse(i interface{}, status *int, w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	c := 0
+	if r, ok := i.([]Event); ok {
+		c = len(r)
+	}
+	w.Header().Set("X-Total-Count", fmt.Sprint(c))
+	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 	if status != nil {
 		w.WriteHeader(*status)
 	} else {

@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react'
 import { EventsApi, Event } from '../openapi'
 import {
     createColumnHelper,
@@ -6,12 +5,10 @@ import {
     getCoreRowModel,
     useReactTable,
 } from '@tanstack/react-table'
-import axios,{AxiosError} from 'axios';
+import axios from 'axios';
+import { useQuery } from '@tanstack/react-query'
 
 const EventTable = () => {
-    const [error, setError] = useState<AxiosError>();
-    const [isLoaded, setIsLoaded] = useState(true);
-    const [events, setEvents] = useState<Event[]>([]);
     const eventsApi = new EventsApi();
 
     const columnHelper = createColumnHelper<Event>()
@@ -46,32 +43,16 @@ const EventTable = () => {
         }),
     ]
 
-    useEffect(() => {
-        eventsApi.eventsGet()
-            .then(
-                (result) => {
-                    setIsLoaded(true);
-                    const { data, status } = result
-                    console.log(status)
-                    setEvents(data);
-                },
-                (error) => {
-                    if (axios.isAxiosError(error)) {
-                        setIsLoaded(true);
-                        setError(error);
-                    }
-                }
-            )
-    }, [])
+    const { isLoading, error, data } = useQuery(['eventData'], () => eventsApi.eventsGet())
     const table = useReactTable({
-        data: events,
+        data: data?.data!,
         columns: columns,
         getCoreRowModel: getCoreRowModel(),
     })
 
-    if (error) {
+    if (axios.isAxiosError(error)) {
         return <div>Error: {error.message}</div>;
-    } else if (!isLoaded) {
+    } else if (isLoading) {
         return <div>Loading...</div>;
     } else {
         return (

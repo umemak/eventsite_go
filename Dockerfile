@@ -54,6 +54,8 @@ COPY . ./
 
 RUN go build -o /server ./cmd/server
 RUN go build -o /gateway ./cmd/gateway
+RUN go build -o /api ./cmd/api
+RUN go build -o /app ./cmd/eventsite
 
 # runner stage for server
 FROM debian:bullseye-slim as server-runner
