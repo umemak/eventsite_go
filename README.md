@@ -38,13 +38,23 @@ DDL --> MySQL
 ## Generate OpenAPI Server
 
 ```sh
-docker run --rm \
+MSYS_NO_PATHCONV=1 docker run --rm \
   -v ${PWD}:/local openapitools/openapi-generator-cli generate \
+  -t /local/template \
   -i /local/openapi.yml \
   -g go-server \
   --additional-properties=router=chi,featureCORS=true \
   -o /local/out
 ```
+
+```sh
+MSYS_NO_PATHCONV=1 docker run --rm \
+  -v ${PWD}:/local openapitools/openapi-generator-cli author template \
+  -g go-server \
+  -o /local/template
+```
+
+openapi-generator author template -g java --library webclient
 
 ## Generate Frontend
 
@@ -55,7 +65,7 @@ npx create-next-app@latest --ts frontend
 ## Generate OpenAPI Client
 
 ```sh
-docker run --rm \
+MSYS_NO_PATHCONV=1 docker run --rm \
   -v "${PWD}:/local" openapitools/openapi-generator-cli generate \
   -i /local/openapi.yml \
   -g typescript-axios \

@@ -20,8 +20,8 @@ export const EventList = props => (
             <TextField source="title" />
             <DateField source="start" />
             <TextField source="place" />
-            <DateField source="open" />
-            <DateField source="close" />
+            <DateField source="open" showTime={true} />
+            <DateField source="close" showTime={true} />
             <TextField source="author" />
             <EditButton />
         </Datagrid>

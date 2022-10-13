@@ -14,7 +14,6 @@ import (
 )
 
 type Event struct {
-
 	Id int64 `json:"id,omitempty"`
 
 	Title string `json:"title,omitempty"`

@@ -73,3 +73,10 @@ COPY --from=builder /gateway /gateway
 CMD ["/gateway"]
 
 EXPOSE 8080
+
+FROM node:18 as react-admin
+
+WORKDIR /work
+
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm install

@@ -87,3 +87,13 @@ services:
       BASE_URL: /docs
     volumes:
       - ./gen/openapiv2/eventsite/v1/event.swagger.json:/gen/openapiv2/apidocs.swagger.json
+
+  # react-admin:
+  #   build:
+  #     target: react-admin
+  #     context: .
+  #   ports:
+  #     - 8084:3000
+  #   volumes:
+  #     - ./frontend:/work
+  #   command: npm run dev
