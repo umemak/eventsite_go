@@ -46,7 +46,7 @@ services:
     image: pocketbase:local
     build:
       context: .
-      dockerfile: Dockerfile.pocketbase
+      target: pocketbase
     container_name: pocketbase
     environment:
       TZ: 'Asia/Tokyo'

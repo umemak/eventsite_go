@@ -80,3 +80,16 @@ WORKDIR /work
 
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm install
+
+# pocketbase
+FROM alpine AS pocketbase
+
+ARG PB_VERSION=0.7.10
+
+WORKDIR /app
+
+RUN wget https://github.com/pocketbase/pocketbase/releases/download/v${PB_VERSION}/pocketbase_${PB_VERSION}_linux_amd64.zip
+RUN unzip pocketbase_${PB_VERSION}_linux_amd64.zip
+RUN rm pocketbase_${PB_VERSION}_linux_amd64.zip
+
+CMD [ "/app/pocketbase", "serve", "--http", "0.0.0.0:8090" ]
