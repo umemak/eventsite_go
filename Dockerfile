@@ -84,7 +84,7 @@ RUN npm install
 # pocketbase
 FROM alpine AS pocketbase
 
-ARG PB_VERSION=0.7.10
+ARG PB_VERSION=0.16.6
 
 WORKDIR /app
 

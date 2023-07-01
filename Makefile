@@ -4,7 +4,8 @@ build:
 
 .PHONY: up
 up:
-	docker compose up -d --remove-orphans
+	docker compose up -d --remove-orphans --wait
+	npx prisma migrate dev
 
 .PHONY: down
 down:

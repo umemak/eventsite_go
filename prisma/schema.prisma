@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model comments {
+  id             BigInt     @id @default(autoincrement())
+  parent_id      BigInt?
+  event_id       BigInt
+  user_id        BigInt
+  comment        String     @db.Text
+  posted_at      DateTime   @db.DateTime(0)
+  events         events     @relation(fields: [event_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "comments_ibfk_1")
+  users          users      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "comments_ibfk_2")
+  comments       comments?  @relation("commentsTocomments", fields: [parent_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "comments_ibfk_3")
+  other_comments comments[] @relation("commentsTocomments")
+
+  @@index([event_id], map: "event_id")
+  @@index([parent_id], map: "parent_id")
+  @@index([user_id], map: "user_id")
+}
+
+model events {
+  id           BigInt         @id @default(autoincrement())
+  title        String         @db.Text
+  start        DateTime       @db.DateTime(0)
+  place        String         @db.Text
+  open         DateTime       @db.DateTime(0)
+  close        DateTime       @db.DateTime(0)
+  author       BigInt
+  comments     comments[]
+  events_users events_users[]
+  uploads      uploads[]
+}
+
+model events_users {
+  id        BigInt  @id @default(autoincrement())
+  event_id  BigInt
+  user_id   BigInt
+  cancelled Boolean @default(false)
+  events    events  @relation(fields: [event_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "events_users_ibfk_1")
+  users     users   @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "events_users_ibfk_2")
+
+  @@index([event_id], map: "event_id")
+  @@index([user_id], map: "user_id")
+}
+
+model uploads {
+  id       BigInt @id @default(autoincrement())
+  event_id BigInt
+  url      String @db.Text
+  events   events @relation(fields: [event_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "uploads_ibfk_1")
+
+  @@index([event_id], map: "event_id")
+}
+
+model users {
+  id           BigInt         @id @default(autoincrement())
+  uid          String         @db.Text
+  name         String         @db.Text
+  comments     comments[]
+  events_users events_users[]
+}

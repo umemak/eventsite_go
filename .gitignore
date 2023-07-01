@@ -22,3 +22,6 @@ pb_data/
 
 # OpenAPI
 out/
+
+# Prisma
+/node_modules
